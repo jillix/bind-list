@@ -17,12 +17,29 @@ define(["adioo/bind/repeater"], function(Repeater) {
                 }
             ]
         }
+    i18n: false, //true is default,
+    addItem: "#addItemButton",
+    removeItem: "#removeItemButton",
+    paging: 33,
+    search: [
+        {
+            elm: "#searchField",
+            ??
+        }
+    ]
+        
+    // TODO:
+    - locale change
+    - add item
+    - remove item
+    - paging
+    - search data
     */
     
-    return function(config) {
+    function init(config) {
         
-        var list = Repeater(config);
+        var list = N.clone(List, Repeater(this), config);
         
         return list;
-    };
+    }
 });
