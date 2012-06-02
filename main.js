@@ -2,21 +2,21 @@ define(["adioo/bind/repeater"], function(Repeater) {
     
     var List = {
         
-        
+        event: function(miid, eventName, data) {
+            
+            N.obs(miid).f(eventName, data);
+        }
     };
     
     /*
         config = {
             
-            source: {
-                
-            },
-            bind: [
-                {
-                    
-                }
-            ]
+            target: "#selector",
+            source: {},
+            bind: [{}]
         }
+        
+        
     i18n: false, //true is default,
     addItem: "#addItemButton",
     removeItem: "#removeItemButton",
@@ -40,6 +40,20 @@ define(["adioo/bind/repeater"], function(Repeater) {
         
         var list = N.clone(List, Repeater(this), config);
         
+        list.target = list.dom.querySelector(list.target);
+        
+        if (list.source) {
+            
+            list.fetch();
+        }
+        
+        if (list.bind) {
+            
+            list.render(list.bind);
+        }
+        
         return list;
     }
+    
+    return init;
 });
