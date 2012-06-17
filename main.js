@@ -27,7 +27,7 @@ define(["adioo/bind/repeater"], function(Repeater) {
             ??
         }
     ]
-        
+    
     // TODO:
     - locale change
     - add item
@@ -38,9 +38,9 @@ define(["adioo/bind/repeater"], function(Repeater) {
     
     function init(config) {
         
-        var list = N.clone(List, Repeater(this), config);
+        var list = N.ext(List, Repeater(this), config);
         
-        list.target = list.dom.querySelector(list.target);
+        list.target = list.dom.querySelector(config.target);
         
         if (list.source) {
             
