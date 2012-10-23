@@ -2,6 +2,8 @@ define(["github/adioo/bind-list/v0.1.0/list"], function(List) {
 
     function init(config) {
 
+this.lang = "de";
+
 if (!config) {
         // user configuration
         config = {
@@ -86,7 +88,6 @@ if (!config) {
         }
 
         var self = List(this, config);
-        self.read();
     }
     
     return init;

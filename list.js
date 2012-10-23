@@ -70,6 +70,10 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
             }
 
             self.on("newItem", createItem);
+
+            if (config.options.autofetch) {
+                self.read();
+            }
         }
 
         function render(item) {

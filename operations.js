@@ -131,7 +131,7 @@ function resolveDataSource(link, callback) {
     var ds = dataSources[link.params.ds];
 
     if (!ds) {
-        return callback("Invalid data sourcefor this application: " + link.params.ds);
+        return callback("Invalid data source for this application: " + link.params.ds);
     }
 
     callback(null, ds);
