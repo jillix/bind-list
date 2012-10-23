@@ -71,6 +71,18 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
 
             self.on("newItem", createItem);
 
+            for (var miid in config.listen) {
+                var miidEvents = config.listen[miid];
+                for (var name in miidEvents) {
+                    var handler = miidEvents[name];
+                    if (typeof self[handler] === "function") {
+                        self.on(name, miid, function(data) {
+                            self[handler].call(self, data);
+                        });
+                    }
+                }
+            }
+
             if (config.options.autofetch) {
                 self.read();
             }
@@ -105,8 +117,9 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
         // Public functions ***************
         // ********************************
 
-        function read() {
-            module.link(config.crud.read, function(err, data) {
+        function read(data) {
+
+            self.link(config.crud.read, { data: data }, function(err, data) {
 
                 if (err) { return; }
 
@@ -148,9 +161,11 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
                 case "single":
                     $("." + selectedClass, container).removeClass(selectedClass);
                     $("#" + dataItem.id, module.dom).addClass(selectedClass);
+                    self.emit("selectionChanged", dataItem);
                     break;
                 case "multiple":
                     $("#" + dataItem.id, module.dom).toggleClass(selectedClass);
+                    break;
                 default: // none
             }
         }
