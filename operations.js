@@ -1,5 +1,24 @@
 var send = require(CONFIG.root + "/core/send.js").send;
 
+var mongo = require("mongodb");
+var Server = mongo.Server;
+var Db = mongo.Db;
+
+var dataSources = {
+    categoriesDS: {
+        type: "mongo",
+        db: "truckshop",
+        collection: "categories"
+    },
+    articlesDS: {
+        type: "mongo",
+        db: "truckshop",
+        collection: "articles"
+    }
+}
+
+var databases = {};
+
 var items = [];
 var index = 0;
 
@@ -34,9 +53,41 @@ exports.create = function(link) {
 
 exports.read = function(link) {
 
-    var results = items;
+    if (link.params && link.params.ds === "testDS") {
+        send.ok(link.res, items);
+        return;
+    }
 
-    send.ok(link.res, results);
+    resolveDataSource(link, function(err, ds) {
+
+        if (err) {
+            send.badrequest(link, err);
+            return;
+        }
+
+        openDatabase(ds, function(err, db) {
+
+            if (err) {
+                send.badrequest(link, err);
+                return;
+            }
+
+            db.collection(ds.collection, function(err, collection) {
+
+                if (err) {
+                    send.badrequest(link, err);
+                    return;
+                }
+
+                collection.find().toArray(function(err, docs) {
+
+                    if (err) { return console.error(err); }
+
+                    send.ok(link.res, docs || []);
+                });
+            });
+        });
+    });
 };
 
 exports.update = function(link) {
@@ -69,3 +120,51 @@ function removeItem(id) {
         }
     }
 }
+
+function resolveDataSource(link, callback) {
+
+    if (!link.params || !link.params.ds) {
+        return callback("This operation is missing the data source.");
+    }
+
+    // TODO here comes the API that gets the data source for application/user
+    var ds = dataSources[link.params.ds];
+
+    if (!ds) {
+        return callback("Invalid data sourcefor this application: " + link.params.ds);
+    }
+
+    callback(null, ds);
+}
+
+function openDatabase(dataSource, callback) {
+
+    if (!dataSource || !dataSource.db) {
+        return callback("Invalid data source.");
+    }
+
+    switch (dataSource.type) {
+        case "mongo":
+
+            // check the cache first maybe we have it already
+            if (databases[dataSource.db]) {
+                callback(null, databases[dataSource.db]);
+                return;
+            }
+
+            // open a new connection to the database
+            var server = new Server('localhost', 27017, { auto_reconnect: true, poolSize: 5 });
+            var db = new Db(dataSource.db, server, { safe: false });
+
+            // cache this db connection
+            databases[dataSource.db] = db;
+
+            db.open(callback);
+            return;
+
+        default:
+            return callback("Invalid data source type: " + dataSource.type);
+    }
+
+}
+

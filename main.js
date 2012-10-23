@@ -2,8 +2,9 @@ define(["github/adioo/bind-list/v0.1.0/list"], function(List) {
 
     function init(config) {
 
+if (!config) {
         // user configuration
-        var listConfig = {
+        config = {
             // (mandatory) what to render fot each data item
             template: {
                 type: "selector", // "url", "html"
@@ -41,7 +42,7 @@ define(["github/adioo/bind-list/v0.1.0/list"], function(List) {
             ]
         };
 
-        listConfig.template.binds = [
+        config.template.binds = [
             {
                 target: ".delete",
                 on: [{
@@ -75,10 +76,17 @@ define(["github/adioo/bind-list/v0.1.0/list"], function(List) {
                 }
             }
         ]
+}
 
-        var self = List(this, listConfig);
+        config.crud = {
+            create: "create",
+            read:   "read",
+            update: "update",
+            delete: "remove"
+        }
+
+        var self = List(this, config);
         self.read();
-        self.emit("newItem", { text: "Dynamic text" });
     }
     
     return init;
