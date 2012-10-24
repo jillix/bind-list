@@ -12,6 +12,7 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
             config.template.binds = config.template.binds || [];
 
             var optClasses = config.options.classes || {}
+            optClasses.item = optClasses.item || "item";
             optClasses.selected = optClasses.selected || "selected";
             config.options.classes = optClasses;
 
@@ -71,14 +72,22 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
 
             self.on("newItem", createItem);
 
+            // for each module instance I listen to
             for (var miid in config.listen) {
                 var miidEvents = config.listen[miid];
+                // for each event for this instance
                 for (var name in miidEvents) {
                     var handler = miidEvents[name];
-                    if (typeof self[handler] === "function") {
+                    // if the handler is a module function name
+                    if (typeof handler === "string" && typeof self[handler] === "function") {
                         self.on(name, miid, function(data) {
                             self[handler].call(self, data);
                         });
+                        continue;
+                    }
+                    // else it must be object
+                    if (handler instanceof Object) {
+                        // TODO
                     }
                 }
             }
@@ -103,6 +112,7 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
             var newItem = $(template).clone();
             newItem
                 .removeClass("template")
+                .addClass(config.options.classes.item)
                 .appendTo(container)
                 .show();
 
@@ -113,11 +123,17 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
             }
         }
 
+        function clearList() {
+            $("." + config.options.classes.item, container).remove();
+        }
+
         // ********************************
         // Public functions ***************
         // ********************************
 
         function read(data) {
+
+            clearList();
 
             self.link(config.crud.read, { data: data }, function(err, data) {
 
@@ -157,15 +173,24 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
 
         function selectItem(dataItem) {
             var selectedClass = config.options.classes.selected;
+
             switch (config.options.selection) {
+
                 case "single":
+                    var currentItem = $("#" + dataItem.id, container);
+                    if (currentItem.hasClass(selectedClass)) {
+                        break;
+                    }
+
                     $("." + selectedClass, container).removeClass(selectedClass);
-                    $("#" + dataItem.id, module.dom).addClass(selectedClass);
+                    $("#" + dataItem.id, container).addClass(selectedClass);
                     self.emit("selectionChanged", dataItem);
                     break;
+
                 case "multiple":
                     $("#" + dataItem.id, module.dom).toggleClass(selectedClass);
                     break;
+
                 default: // none
             }
         }
