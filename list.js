@@ -74,15 +74,23 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
 
             // for each module instance I listen to
             for (var miid in config.listen) {
+
                 var miidEvents = config.listen[miid];
+
                 // for each event for this instance
                 for (var name in miidEvents) {
+
                     var handler = miidEvents[name];
+
                     // if the handler is a module function name
                     if (typeof handler === "string" && typeof self[handler] === "function") {
-                        self.on(name, miid, function(data) {
-                            self[handler].call(self, data);
-                        });
+
+                        (function(handler) {
+                            self.on(name, miid, function(data) {
+                                self[handler].call(self, data);
+                            });
+                        })(handler);
+
                         continue;
                     }
                     // else it must be object
@@ -195,12 +203,22 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
             }
         }
 
+        function show() {
+            $(self.dom).parent().show();
+        }
+
+        function hide() {
+            $(self.dom).parent().hide();
+        }
+
          return {
             init: init,
             read: read,
             removeItem: removeItem,
             removeSelected: removeSelected,
-            selectItem: selectItem
+            selectItem: selectItem,
+            show: show,
+            hide: hide
         };
     }
 
