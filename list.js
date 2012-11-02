@@ -1,4 +1,4 @@
-define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
+define(["github/adioo/bind/v0.2.0/bind", "github/adioo/bind/v0.2.0/events", "/jquery.js"], function(Bind, Events) {
 
     function List(module) {
 
@@ -72,33 +72,7 @@ define(["github/adioo/bind/v0.2.0/bind", "/jquery.js"], function(Bind) {
 
             self.on("newItem", createItem);
 
-            // for each module instance I listen to
-            for (var miid in config.listen) {
-
-                var miidEvents = config.listen[miid];
-
-                // for each event for this instance
-                for (var name in miidEvents) {
-
-                    var handler = miidEvents[name];
-
-                    // if the handler is a module function name
-                    if (typeof handler === "string" && typeof self[handler] === "function") {
-
-                        (function(handler) {
-                            self.on(name, miid, function(data) {
-                                self[handler].call(self, data);
-                            });
-                        })(handler);
-
-                        continue;
-                    }
-                    // else it must be object
-                    if (handler instanceof Object) {
-                        // TODO
-                    }
-                }
-            }
+            Events.call(self, config);
 
             if (config.options.autofetch) {
                 self.read();
