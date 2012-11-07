@@ -1,8 +1,8 @@
 define(["github/adioo/bind-list/v0.1.0/list"], function(List) {
 
-    function init(config) {
+    var self;
 
-this.lang = "de";
+    function init(config) {
 
 if (!config) {
         // user configuration
@@ -87,7 +87,8 @@ if (!config) {
             delete: "remove"
         }
 
-        var self = List(this, config);
+        self = List(this, config);
+        self.lang = "de";
     }
     
     return init;
