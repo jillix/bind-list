@@ -39,7 +39,7 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
                 switch (i) {
                     case "add":
                         binds.push({
-                            target: ".create",
+                            target: config.controls[i],
                             context: ".controls",
                             on: [{
                                 name: "click",
@@ -49,7 +49,7 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
                         break;
                     case "delete":
                         binds.push({
-                            target: ".delete",
+                            target: config.controls[i],
                             context: ".controls",
                             on: [{
                                 name: "click",
@@ -69,8 +69,6 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
             for (var i in config.binds) {
                 Bind.call(self, config.binds[i]);
             }
-
-            self.on("newItem", createItem);
 
             Events.call(self, config);
 
@@ -130,6 +128,7 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
         function createItem(itemData) {
             self.link(config.crud.create, { data: itemData }, function(err, data) {
                 if (err) { return; }
+                render.call(self, data);
             });
         }
 
@@ -188,6 +187,7 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
          return {
             init: init,
             read: read,
+            createItem: createItem,
             removeItem: removeItem,
             removeSelected: removeSelected,
             selectItem: selectItem,
