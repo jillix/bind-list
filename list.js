@@ -8,8 +8,11 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
         var template;
 
         function processConfig(config) {
-            config.options = config.options || {};
             config.template.binds = config.template.binds || [];
+
+            config.options = config.options || {};
+
+            config.options.sort = config.options.sort || {};
 
             var optClasses = config.options.classes || {}
             optClasses.item = optClasses.item || "item";
@@ -73,7 +76,7 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
             Events.call(self, config);
 
             if (config.options.autofetch) {
-                self.read();
+                self.read({}, { sort: config.options.sort });
             }
         }
 
@@ -111,9 +114,14 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
         // Public functions ***************
         // ********************************
 
-        function read(data) {
+        function read(filter, options) {
 
             clearList();
+
+            var data = {
+                filter: filter,
+                options: options
+            }
 
             self.link(config.crud.read, { data: data }, function(err, data) {
 

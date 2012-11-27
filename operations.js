@@ -59,6 +59,8 @@ exports.read = function(link) {
     }
 
     var data = link.data || {};
+    var filter = data.filter || {};
+    var options = data.options || {};
 
     resolveDataSource(link, function(err, ds) {
 
@@ -81,7 +83,7 @@ exports.read = function(link) {
                     return;
                 }
 
-                collection.find(data).toArray(function(err, docs) {
+                collection.find(filter, options).toArray(function(err, docs) {
 
                     if (err) { return console.error(err); }
 
