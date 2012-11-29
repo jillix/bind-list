@@ -127,8 +127,26 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
 
                 if (err) { return; }
 
+                if (!data || !(data.length > 0)) {
+                    return;
+                }
+
                 for (var i in data) {
                     render.call(self, data[i]);
+                }
+
+                var autoselect = config.options.autoselect;
+                switch (autoselect) {
+                    case "first":
+                        selectItem(data[0]);
+                        break;
+                    case "last":
+                        selectItem(data[data.length - 1]);
+                        break;
+                    default:
+                        if (typeof autoselect === "number") {
+                            selectItem(data[autoselect]);
+                        }
                 }
             });
         }
@@ -161,6 +179,11 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
         }
 
         function selectItem(dataItem) {
+
+            if (!dataItem) {
+                return;
+            }
+
             var selectedClass = config.options.classes.selected;
 
             switch (config.options.selection) {
