@@ -159,10 +159,23 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
             });
         }
 
-        function removeItem(itemData) {
+        function _sendRemove(itemData) {
             self.link(config.crud.delete, { data: { id: [itemData.id] } }, function(err, data) {
                 if (err) { return; }
                 $("#" + itemData.id).remove();
+            });
+        }
+
+        function removeItem(itemData) {
+            if (!config.options.deleteConfirmation) {
+                _sendRemove(itemData);
+                return;
+            }
+
+            self.emit("requestRemoveItem", itemData, function(err, confirmation) {
+                if (confirmation) {
+                    _sendRemove(itemData);
+                }
             });
         }
 
