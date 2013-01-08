@@ -19,42 +19,44 @@ var dataSources = {
 
 var databases = {};
 
-var items = [];
-var index = 0;
+var sampleItems = [];
+var sampleIndex = 0;
 
-function initItems() {
-    items = [];
+function initSampleItems() {
+    sampleItems = [];
     for (var i = 0; i < 10; i++) {
-        items.push({
-            id: ++index,
-            text: "Static text" + (i + 1)
+        sampleItems.push({
+            id: ++sampleIndex,
+            text: "Static item " + (i + 1)
         });
     }
 }
 
-initItems();
+initSampleItems();
 
 exports.create = function(link) {
 
     if (!link.data) {
         send.badrequest(link, { status: "Missing data" });
+        return;
     }
 
-    if (items.length >= 20) {
-        initItems();
+    // if this is a sample list
+    if (link.params && link.params.ds === "testDS") {
+        var itemData = createSampleItem(link.data);
+        send.ok(link.res, itemData);
+        return;
     }
 
-    var itemData = link.data;
-    itemData.id = ++index;
-    itemData.text = itemData.text + " "  + itemData.id;
-    items.push(itemData);
+    // TODO add create functionality
+
     send.ok(link.res, itemData);
 };
 
 exports.read = function(link) {
 
     if (link.params && link.params.ds === "testDS") {
-        send.ok(link.res, items);
+        send.ok(link.res, sampleItems);
         return;
     }
 
@@ -104,24 +106,82 @@ exports.remove = function(link) {
         send.badrequest(link, { status: "Missing data" });
     }
 
-    if (link.data.ids) {
-        var ids = link.data.ids;
-        for (var i in ids) {
-            removeItem(ids[i]);
-        }
-    } else {
-        removeItem(link.data.id);
+    // test data
+    if (link.params && link.params.ds === "testDS") {
+        removeSampleItems(link.data);
+        send.ok(link.res, { status: "OK" });
+        return;
     }
 
-    send.ok(link.res, { status: "OK" });
+    resolveDataSource(link, function(err, ds) {
+
+        if (err) {
+            send.badrequest(link, err);
+            return;
+        }
+
+        openDatabase(ds, function(err, db) {
+
+            if (err) {
+                send.badrequest(link, err);
+                return;
+            }
+
+            db.collection(ds.collection, function(err, collection) {
+
+                if (err) {
+                    send.badrequest(link, err);
+                    return;
+                }
+
+                var key = Object.keys(link.data)[0];
+                var values = link.data[key] || [];
+
+                var filter = {};
+                filter[key] = { $in: values };
+
+                collection.remove(filter, function(err, docs) {
+
+                    if (err) { return console.error(err); }
+
+                    send.ok(link.res);
+                });
+            });
+        });
+    });
 };
 
-function removeItem(id) {
-    for (var i in items) {
-        if (items[i] && (items[i].id + "") == (id + "")) {
-            items.splice(i, 1);
-            break;
+function createSampleItem(data) {
+
+    if (sampleItems.length >= 20) {
+        initSampleItems();
+    }
+
+    var itemData = data;
+    itemData.id = ++sampleIndex;
+    itemData.text = "Dynamic item " + itemData.id;
+    sampleItems.push(itemData);
+
+    return itemData;
+}
+
+function removeSampleItems(data) { 
+
+    var keys = Object.keys(data);
+    var key = keys[0];
+    var ids = data[key] || [];
+
+    for (var j in ids) {
+        for (var i in sampleItems) {
+            if (sampleItems[i] && (sampleItems[i].id + "") == (ids[j] + "")) {
+                sampleItems.splice(i, 1);
+                break;
+            }
         }
+    }
+
+    if (sampleItems.length == 0) {
+        initSampleItems();
     }
 }
 

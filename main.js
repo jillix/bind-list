@@ -1,84 +1,8 @@
-define(["github/adioo/bind-list/v0.1.1/list"], function(List) {
+define(["github/adioo/bind-list/v0.1.2/list"], function(List) {
 
     var self;
 
     function init(config) {
-
-if (!config) {
-        // user configuration
-        config = {
-            // (mandatory) what to render fot each data item
-            template: {
-                type: "selector", // "url", "html"
-                value: ".template",
-                binds: []
-            },
-            // (options) where to display rendered items
-            container: ".content",
-            // (mandatory) the CRUD operations are module operations
-            crud: {
-                create: "create",
-                read:   "read",
-                update: "update",
-                delete: "remove"
-            },
-            // (optional) options
-            options: {
-                selection: "multiple", // "single", "multiple"
-                classes: {
-                    selected: "selected"
-                }
-            },
-            controls: {
-                add: ".create",
-                delete: ".delete"
-            },
-            binds: [
-                {
-                    target: "create",
-                    on: [{
-                        name: "click",
-                        emit: "newItem"
-                    }]
-                }
-            ]
-        };
-
-        config.template.binds = [
-            {
-                target: ".delete",
-                on: [{
-                    name: "click",
-                    handler: "removeItem"
-                }]
-            },
-            {
-                on: [{
-                    name: "click",
-                    handler: "selectItem"
-                }]
-            },
-            {
-                attr: [
-                    {
-                        name: "id",
-                        value: {
-                            source: "id",
-                            filter: [
-                                { name: "prefix", args: "itm", library: "/aasdsda" }
-                            ]
-                        }
-                    }
-                ],
-            },
-            {
-                target: ".itemText",
-                html: {
-                    source: "text"
-                }
-            }
-        ]
-}
 
         config.crud = {
             create: "create",
@@ -87,10 +11,95 @@ if (!config) {
             delete: "remove"
         }
 
+        if (config.sample) {
+            // this reads the sample configuration if this is a sample list
+            buildSampleConfig(config);
+        }
+
         self = List(this, config);
         self.lang = "de";
     }
-    
+
+    function buildSampleConfig(config) {
+
+        // (mandatory) what to render fot each data item
+        config.template = {
+            type: "selector", // "url", "html"
+            value: ".template",
+            binds: [
+                {
+                    target: ".delete",
+                    on: [{
+                        name: "click",
+                        handler: "removeItem"
+                    }]
+                },
+                {
+                    on: [{
+                        name: "click",
+                        handler: "selectItem"
+                    }]
+                },
+                {
+                    attr: [
+                        {
+                            name: "id",
+                            value: {
+                                source: "id",
+                                filter: [
+                                    { name: "prefix", args: "itm", library: "/aasdsda" }
+                                ]
+                            }
+                        }
+                    ],
+                },
+                {
+                    target: ".itemText",
+                    html: {
+                        source: "text"
+                    }
+                }
+            ]
+        };
+
+        // (mandatory) where to display rendered items
+        config.container = ".content";
+
+        // (mandatory) the CRUD operations are module operations
+        config.crud = {
+            create: "create",
+            read:   "read",
+            update: "update",
+            delete: "remove"
+        };
+
+        // (optional) options
+        config.options = {
+            selection: "multiple", // "single", "multiple"
+            autofetch: true,
+            classes: {
+                selected: "selected"
+            }
+        };
+
+        // (optional) selectors as handles for core list operations
+        config.controls = {
+            add: ".create",
+            delete: ".delete"
+        };
+
+        // (optional) additional functionality through bind objects
+        config.binds = [
+            {
+                target: "create",
+                on: [{
+                    name: "click",
+                    emit: "newItem"
+                }]
+            }
+        ];
+    }
+
     return init;
 });
 
