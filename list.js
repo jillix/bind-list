@@ -1,4 +1,4 @@
-define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/jquery.js"], function(Bind, Events) {
+define(["github/adioo/bind/v0.2.1/bind", "github/adioo/events/v0.1.0/events", "/jquery.js"], function(Bind, Events) {
 
     function List(module) {
 
@@ -13,6 +13,7 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
             config.options = config.options || {};
 
             config.options.sort = config.options.sort || {};
+            config.options.id = config.options.id || "id";
 
             var optClasses = config.options.classes || {}
             optClasses.item = optClasses.item || "item";
@@ -160,9 +161,11 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
         }
 
         function _sendRemove(itemData) {
-            self.link(config.crud.delete, { data: { id: [itemData.id] } }, function(err, data) {
+            var data = {};
+            data[config.options.id] = [itemData[config.options.id]];
+            self.link(config.crud.delete, { data: data }, function(err, data) {
                 if (err) { return; }
-                $("#" + itemData.id).remove();
+                $("#" + itemData[config.options.id]).remove();
             });
         }
 
@@ -203,18 +206,18 @@ define(["github/adioo/bind/v0.2.0/bind", "github/adioo/events/v0.1.0/events", "/
             switch (config.options.selection) {
 
                 case "single":
-                    var currentItem = $("#" + dataItem.id, container);
+                    var currentItem = $("#" + dataItem[config.options.id], container);
                     if (currentItem.hasClass(selectedClass)) {
                         break;
                     }
 
                     $("." + selectedClass, container).removeClass(selectedClass);
-                    $("#" + dataItem.id, container).addClass(selectedClass);
+                    $("#" + dataItem[config.options.id], container).addClass(selectedClass);
                     self.emit("selectionChanged", dataItem);
                     break;
 
                 case "multiple":
-                    $("#" + dataItem.id, module.dom).toggleClass(selectedClass);
+                    $("#" + dataItem[config.options.id], module.dom).toggleClass(selectedClass);
                     break;
 
                 default: // none
