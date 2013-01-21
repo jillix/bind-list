@@ -106,6 +106,8 @@ define(["github/adioo/bind/v0.2.1/bind", "github/adioo/events/v0.1.0/events", "/
                 bindObj.context = newItem;
                 Bind.call(self, bindObj, item);
             }
+
+            newItem.attr('id', item[config.options.id]);
         }
 
         function clearList() {
