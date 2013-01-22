@@ -78,7 +78,7 @@ define(["github/adioo/bind/v0.2.1/bind", "github/adioo/events/v0.1.2/events", "/
             Events.call(self, config);
 
             if (config.options.autofetch) {
-                self.read({}, { sort: config.options.sort });
+                self.read({});
             }
         }
 
@@ -124,7 +124,10 @@ define(["github/adioo/bind/v0.2.1/bind", "github/adioo/events/v0.1.2/events", "/
 
             var data = {
                 filter: filter,
-                options: options
+                options: options || {}
+            }
+            if (!data.options.sort) {
+                data.options.sort = config.options.sort;
             }
 
             self.link(config.crud.read, { data: data }, function(err, data) {
