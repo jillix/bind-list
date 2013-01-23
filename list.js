@@ -123,11 +123,23 @@ define(["github/adioo/bind/v0.2.1/bind", "github/adioo/events/v0.1.2/events", "/
             clearList();
 
             var data = {
-                filter: filter,
                 options: options || {}
             }
+
+            // add the configured sorting
             if (!data.options.sort) {
                 data.options.sort = config.options.sort;
+            }
+
+            // merge the configured filters
+            if (config.options.filters && typeof config.options.filters === 'object') {
+                data.filter = config.options.filters;
+            } else {
+                data.filter = {};
+            }
+
+            for (var i in filter) {
+                data.filter[i] = filter[i];
             }
 
             self.link(config.crud.read, { data: data }, function(err, data) {
