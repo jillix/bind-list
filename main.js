@@ -17,7 +17,6 @@ define(["github/adioo/bind-list/v0.1.7/list"], function(List) {
         }
 
         self = List(this, config);
-        self.lang = "de";
     }
 
     function buildSampleConfig(config) {
