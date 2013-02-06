@@ -7,12 +7,12 @@ var Db = mongo.Db;
 var dataSources = {
     categoriesDS: {
         type: "mongo",
-        db: "truckshop",
+        db: "aktionshop",
         collection: "categories"
     },
     articlesDS: {
         type: "mongo",
-        db: "truckshop",
+        db: "aktionshop",
         collection: "articles"
     }
 }
