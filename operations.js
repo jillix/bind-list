@@ -136,6 +136,12 @@ exports.remove = function(link) {
 
                 var key = Object.keys(link.data)[0];
                 var values = link.data[key] || [];
+                // if the special mongo ID is the key, convert it to ObjectID
+                if (key === '_id') {
+                    for (var i in values) {
+                        values[i] = mongo.ObjectID(values[i]);
+                    }
+                }
 
                 var filter = {};
                 filter[key] = { $in: values };
