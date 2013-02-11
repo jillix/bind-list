@@ -180,7 +180,7 @@ define(["github/adioo/bind/v0.2.2/bind", "github/adioo/events/v0.1.2/events", "/
         function _sendRemove(itemData) {
             var data = {};
             data[config.options.id] = [itemData[config.options.id]];
-            self.link(config.crud.delete, { data: data }, function(err, data) {
+            self.link(config.crud['delete'], { data: data }, function(err, data) {
                 if (err) { return; }
                 $("#" + itemData[config.options.id]).remove();
             });
@@ -206,7 +206,7 @@ define(["github/adioo/bind/v0.2.2/bind", "github/adioo/events/v0.1.2/events", "/
                 ids.push($(this).attr("id"));
             });
 
-            self.link(config.crud.delete, { data: { id: ids } }, function(err, data) {
+            self.link(config.crud['delete'], { data: { id: ids } }, function(err, data) {
                 if (err) { return; }
                 $("." + selectedClass, container).remove();
             });
