@@ -8,7 +8,7 @@ define(["github/adioo/bind-list/v0.1.9/list"], function(List) {
             create: "create",
             read:   "read",
             update: "update",
-            delete: "remove"
+            'delete': "remove"
         }
 
         if (config.sample) {
@@ -69,7 +69,7 @@ define(["github/adioo/bind-list/v0.1.9/list"], function(List) {
             create: "create",
             read:   "read",
             update: "update",
-            delete: "remove"
+            'delete': "remove"
         };
 
         // (optional) options
@@ -84,7 +84,7 @@ define(["github/adioo/bind-list/v0.1.9/list"], function(List) {
         // (optional) selectors as handles for core list operations
         config.controls = {
             add: ".create",
-            delete: ".delete"
+            'delete': ".delete"
         };
 
         // (optional) additional functionality through bind objects
