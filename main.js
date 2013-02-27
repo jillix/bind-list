@@ -1,4 +1,4 @@
-define(["github/adioo/bind-list/v0.2.0/list"], function(List) {
+define(["github/adioo/bind-list/v0.2.1/list"], function(List) {
 
     var self;
 
