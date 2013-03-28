@@ -55,14 +55,29 @@ exports.create = function(link) {
 
 exports.read = function(link) {
 
-    if (link.params && link.params.ds === "testDS") {
-        send.ok(link.res, sampleItems);
-        return;
-    }
-
     var data = link.data || {};
     var filter = data.filter || {};
     var options = data.options || {};
+
+    if (link.params && link.params.ds === "testDS") {
+        
+        var itemsToSend = sampleItems;
+        
+        if (options.skip >= 0 && options.limit >= 0) {
+
+            var begin = options.skip;
+            var end = begin + options.limit;
+            
+            if (end > itemsToSend.length) {
+                end = itemsToSend.length;
+            }
+            
+            itemsToSend = itemsToSend.slice(begin, end);
+        }
+        
+        send.ok(link.res, itemsToSend);
+        return;
+    }
 
     resolveDataSource(link, function(err, ds) {
 
@@ -98,6 +113,53 @@ exports.read = function(link) {
 
 exports.update = function(link) {
     send.ok(link.res, { status: "OK" });
+};
+
+exports.getPages = function(link) {
+    var pagesNr = 0;
+    
+    var data = link.data || {};
+    var size = data.size;
+        
+    if (link.params && link.params.ds === "testDS") {
+        pagesNr = Math.ceil(sampleItems.length / size);
+        
+        send.ok(link.res, pagesNr || 0);
+        return;
+    }
+
+    resolveDataSource(link, function(err, ds) {
+
+        if (err) {
+            send.badrequest(link, err);
+            return;
+        }
+
+        openDatabase(ds, function(err, db) {
+
+            if (err) {
+                send.badrequest(link, err);
+                return;
+            }
+
+            db.collection(ds.collection, function(err, collection) {
+
+                if (err) {
+                    send.badrequest(link, err);
+                    return;
+                }
+
+                collection.count(function(err, length) {
+
+                    if (err) { return console.error(err); }
+                    
+                    pagesNr = Math.ceil(length / size);
+
+                    send.ok(link.res, pagesNr);
+                });
+            });
+        });
+    });
 };
 
 exports.remove = function(link) {
@@ -136,6 +198,7 @@ exports.remove = function(link) {
 
                 var key = Object.keys(link.data)[0];
                 var values = link.data[key] || [];
+
                 // if the special mongo ID is the key, convert it to ObjectID
                 if (key === '_id') {
                     for (var i in values) {
@@ -235,6 +298,4 @@ function openDatabase(dataSource, callback) {
         default:
             return callback("Invalid data source type: " + dataSource.type);
     }
-
 }
-

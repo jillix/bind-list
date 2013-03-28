@@ -1,20 +1,22 @@
 define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/jquery.js"], function(Bind, Events) {
 
-    function List(module) {
+    var self;
+    var config;
+    var container;
+    var template;
 
-        var self;
-        var config;
-        var container;
-        var template;
+    function List(module) {
 
         function processConfig(config) {
             config.template.binds = config.template.binds || [];
 
             config.options = config.options || {};
-
             config.options.sort = config.options.sort || {};
             config.options.id = config.options.id || "id";
-
+    
+            config.options.pagination = config.options.pagination || {};
+            config.options.pagination.controls = config.options.pagination.controls || {};
+            
             var optClasses = config.options.classes || {}
             optClasses.item = optClasses.item || "item";
             optClasses.selected = optClasses.selected || "selected";
@@ -24,7 +26,6 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
         }
 
         function init(conf) {
-
             // initialize the globals
             self = this;
             config = processConfig(conf);
@@ -65,6 +66,34 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 }
             }
 
+            if (config.options.pagination) {
+                disabledClass = config.options.pagination.controls.disable
+                
+                for (var i in config.options.pagination.controls) {
+                    switch (i) {
+                        case "next":
+                            binds.push({
+                                target: config.options.pagination.controls.next,
+                                on: [{
+                                    name: "click",
+                                    handler: "goToNextPage"
+                                }]
+                            });
+                            break;
+                        
+                        case "previous":
+                            binds.push({
+                                target: config.options.pagination.controls.previous,
+                                on: [{
+                                    name: "click",
+                                    handler: "goToPrevPage"
+                                }]
+                            });
+                            break;
+                    }
+                }
+            }
+
             // run the internal binds
             for (var i in binds) {
                 Bind.call(self, binds[i]);
@@ -78,10 +107,15 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             Events.call(self, config);
 
             if (config.options.autofetch) {
-                self.read({});
+                if (!config.options.pagination) {
+                    self.read({}, { sort: config.options.sort });    
+                }
+                else {
+                    showPage(1);
+                }
             }
         }
-
+        
         function render(item) {
             switch (config.template.type) {
                 case "selector":
@@ -115,9 +149,51 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
         }
 
         // ********************************
+        // Pagination functions ***********
+        // ********************************
+        var page = 1;
+        var disabledClass;
+        
+        function setDisabled() {
+            getPages(config.options.pagination.size, function(err, pagesNr) {
+                if (err) { return; }
+                
+                var controls = config.options.pagination.controls;
+
+                if (page <= 1) {
+                    $(controls.previous).attr(disabledClass, "");
+                }
+                else {
+                    $(controls.previous).removeAttr(disabledClass);
+                }
+
+                if (page >= pagesNr) {
+                    $(controls.next).attr(disabledClass, "");
+                }
+                else {
+                    $(controls.next).removeAttr(disabledClass);
+                }    
+            });
+        }
+        
+        function getPages(size, callback) {
+            self.link("getPages", { data: { size: size } }, function(err, pagesNr) {
+                if (err) { 
+                    callback(err);
+                    return;
+                }
+                
+                callback(null, pagesNr);
+            });
+        }
+        
+        // ********************************
         // Public functions ***************
         // ********************************
 
+          /////////////////////
+         // LIST FUNCTIONS
+        /////////////////////
         function read(filter, options) {
 
             clearList();
@@ -141,7 +217,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             for (var i in filter) {
                 data.filter[i] = filter[i];
             }
-
+            
             self.link(config.crud.read, { data: data }, function(err, data) {
 
                 if (err) { return; }
@@ -173,7 +249,12 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
         function createItem(itemData) {
             self.link(config.crud.create, { data: itemData }, function(err, data) {
                 if (err) { return; }
-                render.call(self, data);
+                if (!config.options.pagination) {
+                    render.call(self, data);    
+                }
+                else {
+                    showPage(page);
+                }
             });
         }
 
@@ -249,13 +330,35 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             $(self.dom).parent().hide();
         }
 
-         return {
+          //////////////////////////////
+         // PAGINATION PUBLIC FUNCTIONS
+        //////////////////////////////
+        function goToNextPage() {
+            showPage(++page);
+        }
+        
+        function goToPrevPage() {
+            showPage(--page);
+        }
+        
+        function showPage(number) {            
+            var size = config.options.pagination.size;
+            var skip = (number - 1) * size;
+            read(null, { skip: skip, limit: size });
+            
+            setDisabled();
+        }
+
+        return {
             init: init,
             read: read,
             createItem: createItem,
             removeItem: removeItem,
             removeSelected: removeSelected,
             selectItem: selectItem,
+            goToNextPage: goToNextPage,
+            goToPrevPage: goToPrevPage,
+            showPage: showPage,
             show: show,
             hide: hide
         };
@@ -264,14 +367,13 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
     return function(module, config) {
 
         var list = new List(module);
+        
         for (var i in list) {
             list[i] = module[i] || list[i];
         }
         list = Object.extend(list, module);
-
         list.init(config);
 
         return list;
     }
 });
-

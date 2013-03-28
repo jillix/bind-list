@@ -5,12 +5,13 @@
     "main": "main.js",
     "dependencies": {
         "github/adioo/bind": "v0.2.4",
-        "github/adioo/events": "v0.1.2"
+        "github/adioo/events": "v0.1.2" 
     },
     "operations": [
         { "file": "operations.js", "function": "create" },
         { "file": "operations.js", "function": "read" },
         { "file": "operations.js", "function": "update" },
-        { "file": "operations.js", "function": "remove" }
+        { "file": "operations.js", "function": "remove" },
+        { "file": "operations.js", "function": "getPages" }
     ]
 }
