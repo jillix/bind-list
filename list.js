@@ -16,6 +16,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
     
             config.options.pagination = config.options.pagination || {};
             config.options.pagination.controls = config.options.pagination.controls || {};
+            config.options.pagination.classes = config.options.pagination.classes || {};
             
             var optClasses = config.options.classes || {}
             optClasses.item = optClasses.item || "item";
@@ -154,17 +155,27 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
         var page = 1;
         var disabledClass;
         
-        function setDisabled() {
-            getPages(config.options.pagination.size, function(err, pagesNr) {
+        function setDisabled(filter, options) {
+            var data = {
+                "filter": filter,
+                "options": options,
+                "size": config.options.pagination.size
+            };
+            
+            getPages(data, function(err, pagesNr) {
                 if (err) { return; }
                 
                 var controls = config.options.pagination.controls;
-
+                var disableClass = config.options.pagination.classes.disable;
+                var disableAttr = config.options.pagination.controls.disable;
+               
                 if (page <= 1) {
-                    $(controls.previous).attr(disabledClass, "");
+                    $(controls.previous).attr(disableAttr, "");
+                    $(controls.previous).addClass(disableClass);
                 }
                 else {
-                    $(controls.previous).removeAttr(disabledClass);
+                    $(controls.previous).removeAttr(disableAttr);
+                    $(controls.previous).removeClass(disableClass);
                 }
 
                 if (page >= pagesNr) {
@@ -176,8 +187,8 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             });
         }
         
-        function getPages(size, callback) {
-            self.link("getPages", { data: { size: size } }, function(err, pagesNr) {
+        function getPages(data, callback) {
+            self.link("getPages", { data: data }, function(err, pagesNr) {
                 if (err) { 
                     callback(err);
                     return;
@@ -194,13 +205,30 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
           /////////////////////
          // LIST FUNCTIONS
         /////////////////////
+        var dbData = {
+            filter: {},
+            options: {}
+        };
+        
         function read(filter, options) {
-
+            
             clearList();
+            
+            options = options || {}; 
 
-            var data = {
-                options: options || {}
+            if (config.options.pagination) {
+                var size = config.options.pagination.size;
+                var skip = (page - 1) * size;
+                
+                options.limit = options.size || size;
+                options.skip = options.skip || skip;
+                
+                setDisabled(filter, options);
             }
+
+
+            var data = {};
+            data.options = options;
 
             // add the configured sorting
             if (!data.options.sort) {
@@ -217,7 +245,18 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             for (var i in filter) {
                 data.filter[i] = filter[i];
             }
-            
+
+            if (dbData.filter !== data.filter || dbData.options !== data.options) {
+                
+                dbData.filter = data.filter;
+                dbData.options = data.options;
+                
+                page = 1;
+                
+                showPage(page, filter, options);
+                return;
+            }
+
             self.link(config.crud.read, { data: data }, function(err, data) {
 
                 if (err) { return; }
@@ -225,7 +264,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 if (!data || !(data.length > 0)) {
                     return;
                 }
-
+                
                 for (var i in data) {
                     render.call(self, data[i]);
                 }
@@ -338,21 +377,23 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
          // PAGINATION PUBLIC FUNCTIONS
         //////////////////////////////
         function goToNextPage() {
-            showPage(++page);
+            showPage(++page, dbData.filter, dbData.options);
         }
         
         function goToPrevPage() {
-            showPage(--page);
+            showPage(--page, dbData.filter, dbData.options);
         }
         
-        function showPage(number) {            
+        function showPage(number, filter, options) {            
             var size = config.options.pagination.size;
             var skip = (number - 1) * size;
-            read(null, { skip: skip, limit: size });
             
-            setDisabled();
+            options.skip = skip;
+            options.limit = size;
+            
+            read(filter, options);
         }
-
+        
         return {
             init: init,
             read: read,

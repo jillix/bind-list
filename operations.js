@@ -154,6 +154,9 @@ exports.getPages = function(link) {
     
     var data = link.data || {};
     var size = data.size;
+    
+    var filter = data.filter || {};
+    var options = data.options || {};
         
     if (link.params && link.params.ds === "testDS") {
         pagesNr = Math.ceil(sampleItems.length / size);
@@ -183,7 +186,7 @@ exports.getPages = function(link) {
                     return;
                 }
 
-                collection.count(function(err, length) {
+                collection.count(filter, function(err, length) {
 
                     if (err) { return console.error(err); }
                     
