@@ -14,6 +14,12 @@ var dataSources = {
         type: "mongo",
         db: "aktionshop",
         collection: "articles"
+    },
+    // Demo DS for testing. It has not to be "testDS".
+    mongoDS: {
+        type: "mongo",
+        db: "test",
+        collection: "col_two"
     }
 }
 
@@ -47,10 +53,38 @@ exports.create = function(link) {
         send.ok(link.res, itemData);
         return;
     }
+    
+    resolveDataSource(link, function(err, ds) {
 
-    // TODO add create functionality
+        if (err) {
+            send.badrequest(link, err);
+            return;
+        }
 
-    send.ok(link.res, itemData);
+        openDatabase(ds, function(err, db) {
+
+            if (err) {
+                send.badrequest(link, err);
+                return;
+            }
+
+            db.collection(ds.collection, function(err, collection) {
+
+                if (err) {
+                    send.badrequest(link, err);
+                    return;
+                }
+
+                collection.insert(link.data, function(err, docs) {
+
+                    if (err) { return console.error(err); }
+                    if (!docs[0] || !docs.length) { return send.internalservererror(link.res, "No data inserted."); }
+
+                    send.ok(link.res, docs[0]);
+                });
+            });
+        });
+    });
 };
 
 exports.read = function(link) {

@@ -287,7 +287,11 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 ids.push($(this).attr("id"));
             });
 
-            self.link(config.crud['delete'], { data: { id: ids } }, function(err, data) {
+            var filter = {};
+            filter.data = {};
+            filter.data[config.options.id] = ids; 
+
+            self.link(config.crud['delete'], filter, function(err, data) {
                 if (err) { return; }
                 $("." + selectedClass, container).remove();
             });

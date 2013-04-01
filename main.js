@@ -80,6 +80,7 @@ define(["github/adioo/bind-list/dev/list"], function(List) {
             classes: {
                 selected: "selected"
             },
+            id: "_id",
             pagination: {
                 size: 5,
                 controls: {
