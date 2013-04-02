@@ -1,29 +1,3 @@
-var send = require(CONFIG.root + "/core/send.js").send;
-
-var mongo = require("mongodb");
-var Server = mongo.Server;
-var Db = mongo.Db;
-
-var dataSources = {
-    categoriesDS: {
-        type: "mongo",
-        db: "aktionshop",
-        collection: "categories"
-    },
-    articlesDS: {
-        type: "mongo",
-        db: "aktionshop",
-        collection: "articles"
-    },
-    // Demo DS for testing. It has not to be "testDS".
-    mongoDS: {
-        type: "mongo",
-        db: "test",
-        collection: "col_two"
-    }
-}
-
-var databases = {};
 
 var sampleItems = [];
 var sampleIndex = 0;
@@ -43,44 +17,44 @@ initSampleItems();
 exports.create = function(link) {
 
     if (!link.data) {
-        send.badrequest(link, { status: "Missing data" });
+        link.send(400, { status: "Missing data" });
         return;
     }
 
     // if this is a sample list
     if (link.params && link.params.ds === "testDS") {
         var itemData = createSampleItem(link.data);
-        send.ok(link.res, itemData);
+        link.send(200, itemData);
         return;
     }
-    
-    resolveDataSource(link, function(err, ds) {
+
+    M.datasource.resolve(link.params.ds, function(err, ds) {
 
         if (err) {
-            send.badrequest(link, err);
+            link.send(400, err);
             return;
         }
 
-        openDatabase(ds, function(err, db) {
+        M.database.open(ds, function(err, db) {
 
             if (err) {
-                send.badrequest(link, err);
+                link.send(400, err);
                 return;
             }
 
             db.collection(ds.collection, function(err, collection) {
 
                 if (err) {
-                    send.badrequest(link, err);
+                    link.send(400, err);
                     return;
                 }
 
                 collection.insert(link.data, function(err, docs) {
 
                     if (err) { return console.error(err); }
-                    if (!docs[0] || !docs.length) { return send.internalservererror(link.res, "No data inserted."); }
+                    if (!docs[0] || !docs.length) { return link.send(500, "No data inserted."); }
 
-                    send.ok(link.res, docs[0]);
+                    link.send(200, docs[0]);
                 });
             });
         });
@@ -109,28 +83,28 @@ exports.read = function(link) {
             itemsToSend = itemsToSend.slice(begin, end);
         }
         
-        send.ok(link.res, itemsToSend);
+        link.send(200, itemsToSend);
         return;
     }
 
-    resolveDataSource(link, function(err, ds) {
+    M.datasource.resolve(link.params.ds, function(err, ds) {
 
         if (err) {
-            send.badrequest(link, err);
+            link.send(400, err);
             return;
         }
 
-        openDatabase(ds, function(err, db) {
+        M.database.open(ds, function(err, db) {
 
             if (err) {
-                send.badrequest(link, err);
+                link.send(400, err);
                 return;
             }
 
             db.collection(ds.collection, function(err, collection) {
 
                 if (err) {
-                    send.badrequest(link, err);
+                    link.send(400, err);
                     return;
                 }
 
@@ -138,7 +112,7 @@ exports.read = function(link) {
 
                     if (err) { return console.error(err); }
 
-                    send.ok(link.res, docs || []);
+                    link.send(200, docs || []);
                 });
             });
         });
@@ -146,7 +120,7 @@ exports.read = function(link) {
 };
 
 exports.update = function(link) {
-    send.ok(link.res, { status: "OK" });
+    link.send(200, { status: "OK" });
 };
 
 exports.getPages = function(link) {
@@ -161,28 +135,28 @@ exports.getPages = function(link) {
     if (link.params && link.params.ds === "testDS") {
         pagesNr = Math.ceil(sampleItems.length / size);
         
-        send.ok(link.res, pagesNr || 0);
+        link.send(200, pagesNr || 0);
         return;
     }
 
-    resolveDataSource(link, function(err, ds) {
+    M.datasource.resolve(link.params.ds, function(err, ds) {
 
         if (err) {
-            send.badrequest(link, err);
+            link.send(400, err);
             return;
         }
 
-        openDatabase(ds, function(err, db) {
+        M.database.open(ds, function(err, db) {
 
             if (err) {
-                send.badrequest(link, err);
+                link.send(400, err);
                 return;
             }
 
             db.collection(ds.collection, function(err, collection) {
 
                 if (err) {
-                    send.badrequest(link, err);
+                    link.send(400, err);
                     return;
                 }
 
@@ -192,7 +166,7 @@ exports.getPages = function(link) {
                     
                     pagesNr = Math.ceil(length / size);
 
-                    send.ok(link.res, pagesNr);
+                    link.send(200, pagesNr);
                 });
             });
         });
@@ -202,34 +176,34 @@ exports.getPages = function(link) {
 exports.remove = function(link) {
 
     if (!link.data) {
-        send.badrequest(link, { status: "Missing data" });
+        link.send(400, { status: "Missing data" });
     }
 
     // test data
     if (link.params && link.params.ds === "testDS") {
         removeSampleItems(link.data);
-        send.ok(link.res, { status: "OK" });
+        link.send(200, { status: "OK" });
         return;
     }
 
-    resolveDataSource(link, function(err, ds) {
+    M.datasource.resolve(link.params.ds, function(err, ds) {
 
         if (err) {
-            send.badrequest(link, err);
+            link.send(400, err);
             return;
         }
 
-        openDatabase(ds, function(err, db) {
+        M.database.open(ds, function(err, db) {
 
             if (err) {
-                send.badrequest(link, err);
+                link.send(400, err);
                 return;
             }
 
             db.collection(ds.collection, function(err, collection) {
 
                 if (err) {
-                    send.badrequest(link, err);
+                    link.send(400, err);
                     return;
                 }
 
@@ -239,7 +213,7 @@ exports.remove = function(link) {
                 // if the special mongo ID is the key, convert it to ObjectID
                 if (key === '_id') {
                     for (var i in values) {
-                        values[i] = mongo.ObjectID(values[i]);
+                        values[i] = M.mongo.ObjectID(values[i]);
                     }
                 }
 
@@ -250,7 +224,7 @@ exports.remove = function(link) {
 
                     if (err) { return console.error(err); }
 
-                    send.ok(link.res);
+                    link.send(200);
                 });
             });
         });
@@ -291,48 +265,3 @@ function removeSampleItems(data) {
     }
 }
 
-function resolveDataSource(link, callback) {
-
-    if (!link.params || !link.params.ds) {
-        return callback("This operation is missing the data source.");
-    }
-
-    // TODO here comes the API that gets the data source for application/user
-    var ds = dataSources[link.params.ds];
-
-    if (!ds) {
-        return callback("Invalid data source for this application: " + link.params.ds);
-    }
-
-    callback(null, ds);
-}
-
-function openDatabase(dataSource, callback) {
-
-    if (!dataSource || !dataSource.db) {
-        return callback("Invalid data source.");
-    }
-
-    switch (dataSource.type) {
-        case "mongo":
-
-            // check the cache first maybe we have it already
-            if (databases[dataSource.db]) {
-                callback(null, databases[dataSource.db]);
-                return;
-            }
-
-            // open a new connection to the database
-            var server = new Server('localhost', 27017, { auto_reconnect: true, poolSize: 5 });
-            var db = new Db(dataSource.db, server, { safe: false });
-
-            // cache this db connection
-            databases[dataSource.db] = db;
-
-            db.open(callback);
-            return;
-
-        default:
-            return callback("Invalid data source type: " + dataSource.type);
-    }
-}
