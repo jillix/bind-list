@@ -135,7 +135,7 @@ exports.getPages = function(link) {
     if (link.params && link.params.ds === "testDS") {
         pagesNr = Math.ceil(sampleItems.length / size);
         
-        link.send(200, pagesNr || 0);
+        link.send(200, "" + (pagesNr || 0));
         return;
     }
 
