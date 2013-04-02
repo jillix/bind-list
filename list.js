@@ -205,11 +205,20 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             options: {}
         };
         
-        function read(filter, options) {
+        var oldFilter, newFilter;
+        
+        function read(fil, ops) {
+            
+            fil = fil || {};
+            ops = ops || {};
+            
+            oldFilter = JSON.stringify(dbData.filter);
+            newFilter = JSON.stringify(fil);
+            
+            var filter = JSON.parse(JSON.stringify(fil));
+            var options = JSON.parse(JSON.stringify(ops));
             
             clearList();
-            
-            options = options || {}; 
 
             if (config.options.pagination) {
                 var size = config.options.pagination.size;
@@ -240,12 +249,14 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 data.filter[i] = filter[i];
             }
 
-            if (JSON.stringify(dbData.filter) !== JSON.stringify(data.filter) || JSON.stringify(dbData.options) !== JSON.stringify(data.options)) {
+            if (oldFilter !== newFilter && config.options.pagination) {
                 
                 dbData.filter = data.filter;
                 dbData.options = data.options;
                 
                 page = 1;
+
+                oldFilter = newFilter;
 
                 showPage(page, dbData.filter, dbData.options);
                 return;
@@ -383,10 +394,13 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             var size = config.options.pagination.size;
             var skip = (number - 1) * size;
             
-            options.skip = skip;
-            options.limit = size;    
+            var fil = JSON.parse(JSON.stringify(filter));
+            var ops = JSON.parse(JSON.stringify(options));
             
-            read(filter, options);
+            ops.skip = skip;
+            ops.limit = size;
+            
+            read(fil, ops);
         }
         
         return {
