@@ -108,12 +108,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             Events.call(self, config);
 
             if (config.options.autofetch) {
-                if (!config.options.pagination) {
-                    self.read({}, { sort: config.options.sort });    
-                }
-                else {
-                    showPage(1);
-                }
+                self.read({}, { sort: config.options.sort });
             }
         }
         
@@ -226,7 +221,6 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 setDisabled(filter, options);
             }
 
-
             var data = {};
             data.options = options;
 
@@ -246,14 +240,14 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 data.filter[i] = filter[i];
             }
 
-            if (dbData.filter !== data.filter || dbData.options !== data.options) {
+            if (JSON.stringify(dbData.filter) !== JSON.stringify(data.filter) || JSON.stringify(dbData.options) !== JSON.stringify(data.options)) {
                 
                 dbData.filter = data.filter;
                 dbData.options = data.options;
                 
                 page = 1;
-                
-                showPage(page, filter, options);
+
+                showPage(page, dbData.filter, dbData.options);
                 return;
             }
 
@@ -292,7 +286,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                     render.call(self, data);    
                 }
                 else {
-                    showPage(page);
+                    showPage(page, dbData.filter, dbData.options);
                 }
             });
         }
@@ -384,12 +378,13 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             showPage(--page, dbData.filter, dbData.options);
         }
         
-        function showPage(number, filter, options) {            
+        function showPage(number, filter, options) {
+            
             var size = config.options.pagination.size;
             var skip = (number - 1) * size;
             
             options.skip = skip;
-            options.limit = size;
+            options.limit = size;    
             
             read(filter, options);
         }

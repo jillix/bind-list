@@ -87,6 +87,9 @@ define(["github/adioo/bind-list/v0.2.2/list"], function(List) {
                     next: ".next",
                     previous: ".prev",
                     disable: "disabled"
+                },
+                classes: {
+                    disable: "disabled"
                 }
             }
         };
