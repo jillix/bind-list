@@ -80,7 +80,11 @@ define(["github/adioo/bind-list/v0.3.0/list"], function(List) {
             classes: {
                 selected: "selected"
             },
-            id: "_id",
+            // When we use a real database, we can use _id.
+            // Also, if we use a database we can have the id key. *
+            // e.g.: { "id": 1, "text": "This is a sample item" }
+            // * default: "id"
+            id: "id",
             pagination: {
                 size: 5,
                 controls: {
