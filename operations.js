@@ -1,4 +1,3 @@
-
 var sampleItems = [];
 var sampleIndex = 0;
 

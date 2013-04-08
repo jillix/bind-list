@@ -1,9 +1,7 @@
-define(["github/adioo/bind-list/v0.3.1/list"], function(List) {
-
-    var self;
+define(["github/adioo/bind-list/dev/list"], function(List) {
 
     function init(config) {
-        
+
         config.crud = {
             create: "create",
             read:   "read",
@@ -17,7 +15,7 @@ define(["github/adioo/bind-list/v0.3.1/list"], function(List) {
             buildSampleConfig(config);
         }
 
-        self = List(this, config);
+        List(this, config);
     }
 
     function buildSampleConfig(config) {

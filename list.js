@@ -1,12 +1,13 @@
 define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/jquery.js"], function(Bind, Events) {
 
-    var self;
-    var config;
-    var container;
-    var template;
-
     function List(module) {
 
+        var self;
+        var config;
+        var container;
+        var template;
+        var pagination = false;
+    
         function processConfig(config) {
             config.template.binds = config.template.binds || [];
 
@@ -15,6 +16,11 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             config.options.id = config.options.id || "id";
     
             config.options.pagination = config.options.pagination || {};
+
+            if (JSON.stringify(config.options.pagination) !== "{}") {
+                pagination = true;
+            }
+
             config.options.pagination.controls = config.options.pagination.controls || {};
             config.options.pagination.classes = config.options.pagination.classes || {};
             
@@ -67,7 +73,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 }
             }
 
-            if (config.options.pagination) {
+            if (pagination) {
                 disabledClass = config.options.pagination.controls.disable
                 
                 for (var i in config.options.pagination.controls) {
@@ -106,6 +112,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             }
 
             Events.call(self, config);
+
 
             if (config.options.autofetch) {
                 self.read({}, { sort: config.options.sort });
@@ -206,9 +213,9 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
         };
         
         var oldFilter, newFilter;
-        
+
         function read(fil, ops) {
-            
+
             fil = fil || {};
             ops = ops || {};
             
@@ -220,7 +227,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
             
             clearList();
 
-            if (config.options.pagination) {
+            if (pagination) {
                 var size = config.options.pagination.size;
                 var skip = (page - 1) * size;
                 
@@ -249,7 +256,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 data.filter[i] = filter[i];
             }
 
-            if (oldFilter !== newFilter && config.options.pagination) {
+            if (oldFilter !== newFilter && pagination) {
                 
                 dbData.filter = data.filter;
                 dbData.options = data.options;
@@ -269,6 +276,7 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
                 if (!data || !(data.length > 0)) {
                     return;
                 }
+
                 
                 for (var i in data) {
                     render.call(self, data[i]);
