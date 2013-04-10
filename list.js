@@ -433,8 +433,10 @@ define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/
         for (var i in list) {
             list[i] = module[i] || list[i];
         }
+        
         list = Object.extend(list, module);
         list.init(config);
+        list.lang = M.getLocale();
 
         return list;
     }
