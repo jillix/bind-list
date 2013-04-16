@@ -1,4 +1,4 @@
-define(["github/adioo/bind/v0.2.4/bind", "github/adioo/events/v0.1.2/events", "/jquery.js"], function(Bind, Events) {
+define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/jquery.js"], function(Bind, Events) {
 
     var self;
     var config;
