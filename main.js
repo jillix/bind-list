@@ -85,13 +85,25 @@ define(["github/adioo/bind-list/dev/list"], function(List) {
             id: "id",
             pagination: {
                 size: 5,
+                numbers: {
+                    template: ".pagination-template",
+                    classes: {
+                        active: "active",
+                        item: "pagination-item",
+                        before: ".prepend-before"
+                    },
+                    keywords: {
+                        pageNumber: "@pageNr@",
+                        active: "@active@"
+                    }
+                },
                 controls: {
                     next: ".next",
                     previous: ".prev",
-                    disable: "disabled"
+                    disable: "disabled",
                 },
                 classes: {
-                    disable: "disabled"
+                    disable: "disabled",
                 }
             }
         };

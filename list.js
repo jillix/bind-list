@@ -7,7 +7,9 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         var container;
         var template;
         var pagination = false;
-    
+        var paginationNumbers = false;
+        var page = 1;
+
         function processConfig(config) {
             config.template.binds = config.template.binds || [];
 
@@ -21,9 +23,18 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                 pagination = true;
             }
 
+            config.options.pagination.numbers = config.options.pagination.numbers || {};
+            
+            if (JSON.stringify(config.options.pagination.numbers) !== "{}") {
+                paginationNumbers = true;
+            }
+            
             config.options.pagination.controls = config.options.pagination.controls || {};
             config.options.pagination.classes = config.options.pagination.classes || {};
             
+            config.options.pagination.numbers.classes = config.options.pagination.numbers.classes || {};
+            config.options.pagination.numbers.keywords = config.options.pagination.numbers.keywords || {};
+
             var optClasses = config.options.classes || {}
             optClasses.item = optClasses.item || "item";
             optClasses.selected = optClasses.selected || "selected";
@@ -81,6 +92,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                         case "next":
                             binds.push({
                                 target: config.options.pagination.controls.next,
+                                // TODO Don't click on disabled class!
                                 on: [{
                                     name: "click",
                                     handler: "goToNextPage"
@@ -98,6 +110,17 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                             });
                             break;
                     }
+                }
+
+                if (paginationNumbers) {
+                    
+                    $("." + config.options.pagination.numbers.classes.item).live("click", function() {
+                        var pageNumber = parseInt($(this).attr("data-page"));
+
+                        page = pageNumber;
+                        
+                        showPage(pageNumber, dbData.filter, dbData.options);
+                    });
                 }
             }
 
@@ -154,10 +177,10 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         // ********************************
         // Pagination functions ***********
         // ********************************
-        var page = 1;
         var disabledClass;
         
         function setDisabled(filter, options) {
+
             var data = {
                 "filter": filter,
                 "options": options,
@@ -167,6 +190,10 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             getPages(data, function(err, pagesNr) {
                 if (err) { return; }
                 
+                if (paginationNumbers) {
+                    buildPaginationNumbers(pagesNr);
+                }
+
                 var controls = config.options.pagination.controls;
                 var disableClass = config.options.pagination.classes.disable;
                 var disableAttr = config.options.pagination.controls.disable;
@@ -181,14 +208,35 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                 }
 
                 if (page >= pagesNr) {
-                    $(controls.next).attr(disabledClass, "");
+                    $(controls.next).attr(disableAttr, "");
+                    $(controls.next).addClass(disabledClass, "");
                 }
                 else {
-                    $(controls.next).removeAttr(disabledClass);
+                    $(controls.next).removeAttr(disableAttr);
+                    $(controls.next).removeClass(disableClass);
                 }    
             });
         }
         
+        function buildPaginationNumbers(numbers) {
+            emptyPagination();
+
+            var numbersConfig = config.options.pagination.numbers;
+            var template = numbersConfig.template;
+
+            for (var i = 1; i <= numbers; i++) {
+                var item = $(template).clone().removeClass(template.substring(1)).addClass(numbersConfig.classes.item);
+              
+                var html = item[0].outerHTML;
+                html = html.replace(new RegExp(numbersConfig.keywords.pageNumber, "g"), i);
+                // if current page
+                html = html.replace(new RegExp(numbersConfig.keywords.active, "g"), (page !== i ? "" : numbersConfig.classes.active));
+
+                $(numbersConfig.classes.before).before(html);
+            }
+        }
+
+
         function getPages(data, callback) {
             self.link("getPages", { data: data }, function(err, pagesNr) {
                 if (err) { 
@@ -411,6 +459,10 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             read(fil, ops);
         }
         
+        function emptyPagination() {
+            $("." + config.options.pagination.numbers.classes.item).remove();
+        }
+        
         return {
             init: init,
             read: read,
@@ -421,6 +473,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             goToNextPage: goToNextPage,
             goToPrevPage: goToPrevPage,
             showPage: showPage,
+            emptyPagination: emptyPagination,
             show: show,
             hide: hide
         };
