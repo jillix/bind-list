@@ -436,7 +436,6 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         
         list = Object.extend(list, module);
         list.init(config);
-        list.lang = M.getLocale();
 
         return list;
     }
