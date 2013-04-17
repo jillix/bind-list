@@ -190,6 +190,13 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             getPages(data, function(err, pagesNr) {
                 if (err) { return; }
                 
+                // the the pagination only when at least 2 pages
+                if (pagesNr > 1) {
+                    $(config.options.pagination.container).show();
+                } else {
+                    $(config.options.pagination.container).hide();
+                }
+
                 if (paginationNumbers) {
                     buildPaginationNumbers(pagesNr);
                 }
@@ -229,8 +236,17 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
               
                 var html = item[0].outerHTML;
                 html = html.replace(new RegExp(numbersConfig.keywords.pageNumber, "g"), i);
-                // if current page
+
+                // if current page add the active class name
                 html = html.replace(new RegExp(numbersConfig.keywords.active, "g"), (page !== i ? "" : numbersConfig.classes.active));
+
+                // hide next button if on the last page
+                if (page === i) $(config.options.pagination.controls.next, self.dom).hide();
+                else $(config.options.pagination.controls.next, self.dom).show();
+
+                // hide previous button if on the first page
+                if (page === 1) $(config.options.pagination.controls.previous, self.dom).hide();
+                else $(config.options.pagination.controls.previous, self.dom).show();
 
                 $(numbersConfig.classes.before).before(html);
             }
@@ -321,7 +337,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
 
                 if (err) { return; }
 
-                if (!data || !(data.length > 0)) {
+                if (!data || !data.length) {
                     return;
                 }
 

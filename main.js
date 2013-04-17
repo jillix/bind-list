@@ -85,6 +85,7 @@ define(["github/adioo/bind-list/dev/list"], function(List) {
             id: "id",
             pagination: {
                 size: 5,
+                container: ".pagination",
                 numbers: {
                     template: ".pagination-template",
                     classes: {
@@ -103,7 +104,7 @@ define(["github/adioo/bind-list/dev/list"], function(List) {
                     disable: "disabled",
                 },
                 classes: {
-                    disable: "disabled",
+                    disable: "disabled"
                 }
             }
         };
