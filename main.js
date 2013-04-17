@@ -83,9 +83,11 @@ define(["github/adioo/bind-list/dev/list"], function(List) {
             // e.g.: { "id": 1, "text": "This is a sample item" }
             // * default: "id"
             id: "id",
+            // (optional) pagination
             pagination: {
-                size: 5,
+                size: 2,
                 container: ".pagination",
+                // (optional) numbers
                 numbers: {
                     template: ".pagination-template",
                     classes: {
@@ -96,6 +98,11 @@ define(["github/adioo/bind-list/dev/list"], function(List) {
                     keywords: {
                         pageNumber: "@pageNr@",
                         active: "@active@"
+                    },
+                    options: {
+                        max: 4, // Can be 0, 1, 2, 3, or greather
+                        alwaysFirst: true,
+                        alwaysLast: true
                     }
                 },
                 controls: {

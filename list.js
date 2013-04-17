@@ -6,7 +6,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         var config;
         var container;
         var template;
-        var pagination = false;
+        var pagination;
         var paginationNumbers = false;
         var page = 1;
 
@@ -20,7 +20,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             config.options.pagination = config.options.pagination || {};
 
             if (JSON.stringify(config.options.pagination) !== "{}") {
-                pagination = true;
+                pagination = config.options.pagination;
             }
 
             config.options.pagination.numbers = config.options.pagination.numbers || {};
@@ -31,10 +31,15 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             
             config.options.pagination.controls = config.options.pagination.controls || {};
             config.options.pagination.classes = config.options.pagination.classes || {};
-            
+
+            config.options.pagination.numbers.options = config.options.pagination.numbers.options || {}
             config.options.pagination.numbers.classes = config.options.pagination.numbers.classes || {};
             config.options.pagination.numbers.keywords = config.options.pagination.numbers.keywords || {};
-
+            
+            if (pagination) {
+                pagination = config.options.pagination;
+            }
+            
             var optClasses = config.options.classes || {}
             optClasses.item = optClasses.item || "item";
             optClasses.selected = optClasses.selected || "selected";
@@ -85,13 +90,21 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             }
 
             if (pagination) {
-                disabledClass = config.options.pagination.controls.disable
+
+                // Build DOM references
+                pagination.dom = {};
+                pagination.dom.container = $(pagination.container);
+                pagination.dom.next = $(pagination.controls.next);
+                pagination.dom.previous = $(pagination.controls.previous);
+                pagination.dom.pages = [];
+
+                disabledClass = pagination.controls.disable
                 
-                for (var i in config.options.pagination.controls) {
+                for (var i in pagination.controls) {
                     switch (i) {
                         case "next":
                             binds.push({
-                                target: config.options.pagination.controls.next,
+                                target: pagination.controls.next,
                                 // TODO Don't click on disabled class!
                                 on: [{
                                     name: "click",
@@ -102,7 +115,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                         
                         case "previous":
                             binds.push({
-                                target: config.options.pagination.controls.previous,
+                                target: pagination.controls.previous,
                                 on: [{
                                     name: "click",
                                     handler: "goToPrevPage"
@@ -114,7 +127,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
 
                 if (paginationNumbers) {
                     
-                    $("." + config.options.pagination.numbers.classes.item).live("click", function() {
+                    $("." + pagination.numbers.classes.item).live("click", function() {
                         var pageNumber = parseInt($(this).attr("data-page"));
 
                         page = pageNumber;
@@ -184,7 +197,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             var data = {
                 "filter": filter,
                 "options": options,
-                "size": config.options.pagination.size
+                "size": pagination.size
             };
             
             getPages(data, function(err, pagesNr) {
@@ -192,18 +205,18 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                 
                 // the the pagination only when at least 2 pages
                 if (pagesNr > 1) {
-                    $(config.options.pagination.container).show();
+                    pagination.dom.container.show();
                 } else {
-                    $(config.options.pagination.container).hide();
+                    pagination.dom.container.hide();
                 }
 
                 if (paginationNumbers) {
                     buildPaginationNumbers(pagesNr);
                 }
 
-                var controls = config.options.pagination.controls;
-                var disableClass = config.options.pagination.classes.disable;
-                var disableAttr = config.options.pagination.controls.disable;
+                var controls = pagination.controls;
+                var disableClass = pagination.classes.disable;
+                var disableAttr = pagination.controls.disable;
                
                 if (page <= 1) {
                     $(controls.previous).attr(disableAttr, "");
@@ -226,9 +239,11 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         }
         
         function buildPaginationNumbers(numbers) {
+            numbers = parseInt(numbers) || 0;
+
             emptyPagination();
 
-            var numbersConfig = config.options.pagination.numbers;
+            var numbersConfig = pagination.numbers;
             var template = numbersConfig.template;
 
             for (var i = 1; i <= numbers; i++) {
@@ -241,17 +256,96 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                 html = html.replace(new RegExp(numbersConfig.keywords.active, "g"), (page !== i ? "" : numbersConfig.classes.active));
 
                 // hide next button if on the last page
-                if (page === i) $(config.options.pagination.controls.next, self.dom).hide();
-                else $(config.options.pagination.controls.next, self.dom).show();
+                if (page === i) $(pagination.controls.next, self.dom).hide();
+                else $(pagination.controls.next, self.dom).show();
 
                 // hide previous button if on the first page
-                if (page === 1) $(config.options.pagination.controls.previous, self.dom).hide();
-                else $(config.options.pagination.controls.previous, self.dom).show();
+                if (page === 1) $(pagination.controls.previous, self.dom).hide();
+                else $(pagination.controls.previous, self.dom).show();
 
-                $(numbersConfig.classes.before).before(html);
+                item = $(html);
+
+                var appendItem = true;
+
+                // if we have options for showing the pages numbers
+                if (!$.isEmptyObject(numbersConfig.options)) {
+                    appendItem = false;
+
+                    var options = numbersConfig.options;
+
+                    // If max is 0, then only Next and Prev buttons are shown.
+                    if (options.max) {
+
+                        // Show only the current page
+                        if (options.max === 1 && i === page) {
+                            pagination.dom.pages.push(item);
+                        }
+
+                        // First page ... current
+                        if (options.max === 2) {
+                            if (i === 1) {
+                                pagination.dom.pages.push(item);
+                            }
+                            
+                            // If is current page
+                            if (i === page) {
+                                // To prevent "« 1 ... 2"
+                                if (i > 2) {
+                                    appendDots(item, i);
+                                }
+
+                                pagination.dom.pages.push(item);
+                            }
+                        }
+
+
+                        /*
+                            If max is 3:
+                                « 1 ... current ... last »
+                            If max is greather than 3
+                                « 1 ... current - delta --> current --> current + delta ... last »
+                        */
+                        if (options.max >= 3) {
+
+                            // TODO Maybe a more inspired variable name?
+                            var delta = options.max - 3;
+                            
+                            if (i === 1) {
+                                pagination.dom.pages.push(item);
+                               
+                                if (page - delta > 2) {
+                                    appendDots(item, i);
+                                }
+                            }
+
+                            if (i === numbers) {
+                                if (page < numbers - 1) {
+                                    appendDots(item, i);
+                                }
+
+                                pagination.dom.pages.push(item);
+                            }
+
+                            if (i >= page - delta && i <= page + delta) {
+                                pagination.dom.pages.push(item);
+                            }
+                        }
+                    }
+                }
+                else {
+                    pagination.dom.pages.push(item);
+                }
+            }
+
+            for (var i in pagination.dom.pages) {
+                $(numbersConfig.classes.before).before(pagination.dom.pages[i]);
             }
         }
 
+        function appendDots(templ, pageNumber) {
+            var dots = $(templ[0].outerHTML.replace(new RegExp(pageNumber, "g"), "..."));
+            pagination.dom.pages.push(dots);
+        }
 
         function getPages(data, callback) {
             self.link("getPages", { data: data }, function(err, pagesNr) {
@@ -292,7 +386,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             clearList();
 
             if (pagination) {
-                var size = config.options.pagination.size;
+                var size = pagination.size;
                 var skip = (page - 1) * size;
                 
                 options.limit = options.size || size;
@@ -365,7 +459,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         function createItem(itemData) {
             self.link(config.crud.create, { data: itemData }, function(err, data) {
                 if (err) { return; }
-                if (!config.options.pagination) {
+                if (!pagination) {
                     render.call(self, data);    
                 }
                 else {
@@ -463,7 +557,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         
         function showPage(number, filter, options) {
             
-            var size = config.options.pagination.size;
+            var size = pagination.size;
             var skip = (number - 1) * size;
             
             var fil = JSON.parse(JSON.stringify(filter));
@@ -476,7 +570,8 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
         }
         
         function emptyPagination() {
-            $("." + config.options.pagination.numbers.classes.item).remove();
+            $("." + pagination.numbers.classes.item).remove();
+            pagination.dom.pages = [];
         }
         
         return {
