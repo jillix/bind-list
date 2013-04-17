@@ -130,6 +130,10 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                     $("." + pagination.numbers.classes.item).live("click", function() {
                         var pageNumber = parseInt($(this).attr("data-page"));
 
+                        if (!pageNumber) {
+                            return;
+                        }
+
                         page = pageNumber;
                         
                         showPage(pageNumber, dbData.filter, dbData.options);
@@ -291,7 +295,7 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                             if (i === page) {
                                 // To prevent "« 1 ... 2"
                                 if (i > 2) {
-                                    appendDots(item, i);
+                                    appendDots();
                                 }
 
                                 pagination.dom.pages.push(item);
@@ -314,13 +318,13 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
                                 pagination.dom.pages.push(item);
                                
                                 if (page - delta > 2) {
-                                    appendDots(item, i);
+                                    appendDots();
                                 }
                             }
 
                             if (i === numbers) {
                                 if (page < numbers - 1) {
-                                    appendDots(item, i);
+                                    appendDots();
                                 }
 
                                 pagination.dom.pages.push(item);
@@ -342,9 +346,17 @@ define(["github/adioo/bind/v0.2.5/bind", "github/adioo/events/v0.1.2/events", "/
             }
         }
 
-        function appendDots(templ, pageNumber) {
-            var dots = $(templ[0].outerHTML.replace(new RegExp(pageNumber, "g"), "..."));
-            pagination.dom.pages.push(dots);
+        function appendDots() {
+            
+            var li = $("<li>");
+            li.addClass(pagination.numbers.classes.item);
+            
+            var span = $("<span>");
+            span.text("…");
+
+            li.append(span);
+
+            pagination.dom.pages.push(li);
         }
 
         function getPages(data, callback) {
