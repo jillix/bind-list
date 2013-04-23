@@ -3,10 +3,10 @@
     "owner": "adioo",
     "name": "bind-list",
     "dependencies": [
-        "github/adioo/bind/v0.2.5",
-        "github/adioo/events/v0.1.2",
         "/main.js",
         "/list.js",
+        "github/adioo/bind/v0.3.0",
+        "github/adioo/events/v0.2.0",
         "http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"
     ],
     "operations": [
