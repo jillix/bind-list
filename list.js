@@ -128,7 +128,7 @@ function List(module) {
 
             if (paginationNumbers) {
                 
-                $("." + pagination.numbers.classes.item).live("click", function() {
+                $("." + pagination.numbers.classes.item).delegate("click", function() {
                     var pageNumber = parseInt($(this).attr("data-page"));
 
                     if (!pageNumber) {
