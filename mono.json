@@ -2,11 +2,13 @@
     "source": "github",
     "owner": "adioo",
     "name": "bind-list",
-    "main": "main.js",
-    "dependencies": {
-        "github/adioo/bind": "v0.2.5",
-        "github/adioo/events": "v0.1.2" 
-    },
+    "dependencies": [
+        "github/adioo/bind/v0.2.5",
+        "github/adioo/events/v0.1.2",
+        "/main.js",
+        "/list.js",
+        "http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"
+    ],
     "operations": [
         { "file": "operations.js", "function": "create" },
         { "file": "operations.js", "function": "read" },
