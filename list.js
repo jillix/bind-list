@@ -128,7 +128,7 @@ function List(module) {
 
             if (paginationNumbers) {
                 
-                $("." + pagination.numbers.classes.item).delegate("click", function() {
+                $(self.dom).on("click", "." + pagination.numbers.classes.item + ":not(.active)", function() {
                     var pageNumber = parseInt($(this).attr("data-page"));
 
                     if (!pageNumber) {
@@ -616,3 +616,4 @@ module.exports = function (module, config) {
 
     return list;
 }
+
