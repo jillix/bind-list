@@ -1,5 +1,5 @@
-var Bind = require("github/adioo/bind");
-var Events = require("github/adioo/events");
+var Bind = require("github/jillix/bind");
+var Events = require("github/jillix/events");
 
 function List(module) {
 
