@@ -5,8 +5,8 @@
     "dependencies": [
         "/main.js",
         "/list.js",
-        "github/adioo/bind/v0.3.0",
-        "github/adioo/events/v0.2.0",
+        "github/jillix/bind/v0.1.0",
+        "github/jillix/events/v0.2.0",
         "http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"
     ],
     "operations": [
