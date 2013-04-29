@@ -1,4 +1,3 @@
-M.wrap('github/jillix/bind-list/v0.1.0/list.js', function (require, module, exports) {
 var Bind = require("github/jillix/bind");
 var Events = require("github/jillix/events");
 
@@ -617,6 +616,3 @@ module.exports = function (module, config) {
 
     return list;
 }
-
-
-return module; });
