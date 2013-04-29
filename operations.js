@@ -1,3 +1,6 @@
+var Mongo = require("./providers/mongo");
+var Orient = require("./providers/orient");
+
 var sampleItems = [];
 var sampleIndex = 0;
 
@@ -34,29 +37,32 @@ exports.create = function(link) {
             return;
         }
 
-        M.database.open(ds, function(err, db) {
+        switch (ds.type) {
+            case "mongo":
+                Mongo.create(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
 
-            if (err) {
-                link.send(400, err);
-                return;
-            }
-
-            db.collection(ds.collection, function(err, collection) {
-
-                if (err) {
-                    link.send(400, err);
-                    return;
-                }
-
-                collection.insert(link.data, function(err, docs) {
-
-                    if (err) { return console.error(err); }
-                    if (!docs[0] || !docs.length) { return link.send(500, "No data inserted."); }
-
-                    link.send(200, docs[0]);
+                    link.send(200, data);
                 });
-            });
-        });
+                break;
+            
+            case "orient":
+                Orient.create(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
+
+                    link.send(200, data);
+                });
+                break;
+
+            break;
+        }
+
     });
 };
 
@@ -92,34 +98,66 @@ exports.read = function(link) {
             link.send(400, err);
             return;
         }
+        
+        switch (ds.type) {
+            case "mongo":
+                Mongo.read(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
 
-        M.database.open(ds, function(err, db) {
-
-            if (err) {
-                link.send(400, err);
-                return;
-            }
-
-            db.collection(ds.collection, function(err, collection) {
-
-                if (err) {
-                    link.send(400, err);
-                    return;
-                }
-
-                collection.find(filter, options).toArray(function(err, docs) {
-
-                    if (err) { return console.error(err); }
-
-                    link.send(200, docs || []);
+                    link.send(200, data);
                 });
-            });
-        });
+                break;
+            
+            case "orient":
+                Orient.read(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
+
+                    link.send(200, data);
+                });
+                break;
+        }
     });
 };
 
 exports.update = function(link) {
-    link.send(200, { status: "OK" });
+
+    M.datasource.resolve(link.params.ds, function(err, ds) {
+
+        if (err) {
+            link.send(400, err);
+            return;
+        }
+        
+        switch (ds.type) {
+            case "mongo":
+                Mongo.update(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
+
+                    link.send(200, data);
+                });
+                break;
+            
+            case "orient":
+                Orient.update(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
+
+                    link.send(200, data);
+                });
+                break;
+        }
+    });
 };
 
 exports.getPages = function(link) {
@@ -145,30 +183,29 @@ exports.getPages = function(link) {
             return;
         }
 
-        M.database.open(ds, function(err, db) {
+        switch (ds.type) {
+            case "mongo":
+                Mongo.getPages(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
 
-            if (err) {
-                link.send(400, err);
-                return;
-            }
-
-            db.collection(ds.collection, function(err, collection) {
-
-                if (err) {
-                    link.send(400, err);
-                    return;
-                }
-
-                collection.count(filter, function(err, length) {
-
-                    if (err) { return console.error(err); }
-                    
-                    pagesNr = Math.ceil(length / size);
-
-                    link.send(200, pagesNr);
+                    link.send(200, data);
                 });
-            });
-        });
+                break;
+            
+            case "orient":
+                Orient.getPages(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
+
+                    link.send(200, data);
+                });
+                break;
+        }
     });
 };
 
@@ -192,41 +229,29 @@ exports.remove = function(link) {
             return;
         }
 
-        M.database.open(ds, function(err, db) {
-
-            if (err) {
-                link.send(400, err);
-                return;
-            }
-
-            db.collection(ds.collection, function(err, collection) {
-
-                if (err) {
-                    link.send(400, err);
-                    return;
-                }
-
-                var key = Object.keys(link.data)[0];
-                var values = link.data[key] || [];
-
-                // if the special mongo ID is the key, convert it to ObjectID
-                if (key === '_id') {
-                    for (var i in values) {
-                        values[i] = M.mongo.ObjectID(values[i]);
+        switch (ds.type) {
+            case "mongo":
+                Mongo.remove(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
                     }
-                }
 
-                var filter = {};
-                filter[key] = { $in: values };
-
-                collection.remove(filter, function(err, docs) {
-
-                    if (err) { return console.error(err); }
-
-                    link.send(200);
+                    link.send(200, data);
                 });
-            });
-        });
+                break;
+            
+            case "orient":
+                Orient.remove(ds, function(err, data) {
+                    if (err) {
+                        link.send(400, err);
+                        return;
+                    }
+
+                    link.send(200, data);
+                });
+                break;
+        }
     });
 };
 
