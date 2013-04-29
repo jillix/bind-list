@@ -1,4 +1,3 @@
-M.wrap('github/jillix/bind-list/v0.1.0/main.js', function (require, module, exports) {
 var List = require("./list");
 
 module.exports = function (config) {
@@ -134,5 +133,3 @@ function buildSampleConfig(config) {
         }
     ];
 }
-
-return module; });
