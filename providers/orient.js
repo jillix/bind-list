@@ -15,7 +15,7 @@ exports.create = function(ds, callback) {
     callback(null, "Not implemented yet for Orient.")
 };
 
-exports.read = function(ds, callback) {
+exports.read = function(link, ds, callback) {
 
     var server = new Server(serverConfig);
     var db = new Db(ds.db, server, dbConfig);
@@ -34,7 +34,22 @@ exports.read = function(ds, callback) {
                 return;
             }
 
-            callback(null, data);
+            // Specific for MonoDev
+            // TODO Make it flexible
+            // Remove the apps that aren't owned by the user
+            // TODO Use filters
+            var dataToSend = [];
+            if (link.session.apps) {
+                for (var i in data) {
+                    if (link.session.apps.indexOf(data[i].id) !== -1) {
+                        dataToSend.push(data[i]);
+                    }
+                }
+            }
+            else {
+                dataToSend = data;
+            }
+            callback(null, dataToSend);
         }); 
     });
 };

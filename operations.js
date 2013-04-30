@@ -112,7 +112,7 @@ exports.read = function(link) {
                 break;
             
             case "orient":
-                Orient.read(ds, function(err, data) {
+                Orient.read(link, ds, function(err, data) {
                     if (err) {
                         link.send(400, err);
                         return;
