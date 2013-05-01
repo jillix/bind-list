@@ -34,22 +34,7 @@ exports.read = function(link, ds, callback) {
                 return;
             }
 
-            // Specific for MonoDev
-            // TODO Make it flexible
-            // Remove the apps that aren't owned by the user
-            // TODO Use filters
-            var dataToSend = [];
-            if (link.session.apps) {
-                for (var i in data) {
-                    if (link.session.apps.indexOf(data[i].id) !== -1) {
-                        dataToSend.push(data[i]);
-                    }
-                }
-            }
-            else {
-                dataToSend = data;
-            }
-            callback(null, dataToSend);
+            callback(null, data);
         }); 
     });
 };
