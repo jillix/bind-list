@@ -39,7 +39,7 @@ exports.create = function(link) {
 
         switch (ds.type) {
             case "mongo":
-                Mongo.create(ds, function(err, data) {
+                Mongo.create(link, ds, function(err, data) {
                     if (err) {
                         link.send(400, err);
                         return;
@@ -67,10 +67,6 @@ exports.create = function(link) {
 };
 
 exports.read = function(link) {
-
-    var data = link.data || {};
-    var filter = data.filter || {};
-    var options = data.options || {};
 
     if (link.params && link.params.ds === "testDS") {
         
@@ -101,7 +97,7 @@ exports.read = function(link) {
         
         switch (ds.type) {
             case "mongo":
-                Mongo.read(ds, function(err, data) {
+                Mongo.read(link, ds, function(err, data) {
                     if (err) {
                         link.send(400, err);
                         return;

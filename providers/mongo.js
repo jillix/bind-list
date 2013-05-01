@@ -1,4 +1,4 @@
-exports.create = function(ds, callback) {
+exports.create = function(link, ds, callback) {
 
     M.database.open(ds, function(err, db) {
 
@@ -14,7 +14,7 @@ exports.create = function(ds, callback) {
                 return;
             }
 
-            collection.insert(link.data, function(err, docs) {
+            collection.insert(link, function(err, docs) {
 
                 if (err) { return callback(err); }
                 if (!docs[0] || !docs.length) { return callback("No data inserted."); }
@@ -25,7 +25,11 @@ exports.create = function(ds, callback) {
     });
 };
 
-exports.read = function(ds, callback) {
+exports.read = function(link, ds, callback) {
+
+    var data = link.data || {};
+    var filter = data.filter || {};
+    var options = data.options || {};
 
     M.database.open(ds, function(err, db) {
 
