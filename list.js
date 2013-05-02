@@ -622,4 +622,3 @@ module.exports = function (module, config) {
 
     return list;
 }
-
