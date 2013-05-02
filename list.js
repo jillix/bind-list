@@ -520,6 +520,11 @@ function List(module) {
         });
     }
 
+    function deselect() {
+        var selectedClass = config.options.classes.selected;
+        $("." + selectedClass, container).removeClass(selectedClass);
+    }
+
     function selectItem(dataItem) {
 
         if (!dataItem) {
@@ -586,13 +591,14 @@ function List(module) {
         $("." + pagination.numbers.classes.item).remove();
         pagination.dom.pages = [];
     }
-    
+
     return {
         init: init,
         read: read,
         createItem: createItem,
         removeItem: removeItem,
         removeSelected: removeSelected,
+        deselect: deselect,
         selectItem: selectItem,
         goToNextPage: goToNextPage,
         goToPrevPage: goToPrevPage,
