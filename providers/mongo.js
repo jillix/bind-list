@@ -128,7 +128,7 @@ exports.remove = function(link, ds, callback) {
 
                 if (err) { return callback(err); }
 
-                callback(200);
+                callback(null);
             });
         });
     });
