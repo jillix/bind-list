@@ -59,7 +59,16 @@ exports.update = function(ds, callback) {
     callback(200, { status: "OK" });
 };
 
-exports.getPages = function(ds, callback) {
+exports.getPages = function(link, ds, callback) {
+    
+    var pagesNr = 0;
+    
+    var data = link.data || {};
+    var size = data.size;
+    
+    var filter = data.filter || {};
+    var options = data.options || {};
+        
     M.database.open(ds, function(err, db) {
 
         if (err) {
@@ -86,7 +95,7 @@ exports.getPages = function(ds, callback) {
     });
 };
 
-exports.remove = function(ds, callback) {
+exports.remove = function(link, ds, callback) {
 
     M.database.open(ds, function(err, db) {
 

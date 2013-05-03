@@ -157,14 +157,7 @@ exports.update = function(link) {
 };
 
 exports.getPages = function(link) {
-    var pagesNr = 0;
     
-    var data = link.data || {};
-    var size = data.size;
-    
-    var filter = data.filter || {};
-    var options = data.options || {};
-        
     if (link.params && link.params.ds === "testDS") {
         pagesNr = Math.ceil(sampleItems.length / size);
         
@@ -181,7 +174,7 @@ exports.getPages = function(link) {
 
         switch (ds.type) {
             case "mongo":
-                Mongo.getPages(ds, function(err, data) {
+                Mongo.getPages(link, ds, function(err, data) {
                     if (err) {
                         link.send(400, err);
                         return;
@@ -227,7 +220,7 @@ exports.remove = function(link) {
 
         switch (ds.type) {
             case "mongo":
-                Mongo.remove(ds, function(err, data) {
+                Mongo.remove(link, ds, function(err, data) {
                     if (err) {
                         link.send(400, err);
                         return;
