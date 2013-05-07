@@ -94,6 +94,6 @@
             }]
         }
     ],
-    "html": "list.html",
+    "html": "/list.html",
     "css": ["//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css"]
 }
