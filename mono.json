@@ -15,5 +15,8 @@
         { "file": "operations.js", "function": "update" },
         { "file": "operations.js", "function": "remove" },
         { "file": "operations.js", "function": "getPages" }
-    ]
+    ],
+    "templates": {
+        "Sample list with pagination": "templates/sample_list_with_pagination"
+    }
 }
