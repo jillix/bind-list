@@ -17,6 +17,6 @@
         { "file": "operations.js", "function": "getPages" }
     ],
     "templates": {
-        "Sample list with pagination": "templates/sample_list_with_pagination"
+        "List with pagination": "templates/list_with_pagination"
     }
 }
