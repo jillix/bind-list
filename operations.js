@@ -1,20 +1,28 @@
-var Mongo = require("./providers/mongo");
-var Orient = require("./providers/orient");
+var providers = {
+    mongo: require("./providers/mongo"),
+    orient: require("./providers/orient")
+};
 
 var sampleItems = [];
 var sampleIndex = 0;
 
-function initSampleItems() {
-    sampleItems = [];
-    for (var i = 0; i < 10; i++) {
-        sampleItems.push({
-            id: ++sampleIndex,
-            text: "Static item " + (i + 1)
-        });
-    }
-}
+function executeProviderOperation(link, ds, name) {
 
-initSampleItems();
+    var provider = providers[ds.type] || {};
+    if (typeof provider[name] !== "function") {
+        link.send(400, { status: "No such function '" + name + "' in provider '" + ds.type + "'" });
+        return;
+    }
+
+    provider[name](link, ds, function(err, data) {
+        if (err) {
+            link.send(400, err);
+            return;
+        }
+
+        link.send(200, data);
+    });
+}
 
 exports.create = function(link) {
 
@@ -37,32 +45,7 @@ exports.create = function(link) {
             return;
         }
 
-        switch (ds.type) {
-            case "mongo":
-                Mongo.create(link, ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-            
-            case "orient":
-                Orient.create(ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-
-            break;
-        }
-
+        executeProviderOperation(link, ds, 'create');
     });
 };
 
@@ -94,30 +77,8 @@ exports.read = function(link) {
             link.send(400, err);
             return;
         }
-        
-        switch (ds.type) {
-            case "mongo":
-                Mongo.read(link, ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
 
-                    link.send(200, data);
-                });
-                break;
-            
-            case "orient":
-                Orient.read(link, ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-        }
+        executeProviderOperation(link, ds, 'read');
     });
 };
 
@@ -130,41 +91,12 @@ exports.update = function(link) {
             return;
         }
         
-        switch (ds.type) {
-            case "mongo":
-                Mongo.update(ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-            
-            case "orient":
-                Orient.update(ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-        }
+        executeProviderOperation(link, ds, 'update');
     });
 };
 
 exports.getPages = function(link) {
-    var pagesNr = 0;
     
-    var data = link.data || {};
-    var size = data.size;
-    
-    var filter = data.filter || {};
-    var options = data.options || {};
-        
     if (link.params && link.params.ds === "testDS") {
         pagesNr = Math.ceil(sampleItems.length / size);
         
@@ -179,29 +111,7 @@ exports.getPages = function(link) {
             return;
         }
 
-        switch (ds.type) {
-            case "mongo":
-                Mongo.getPages(ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-            
-            case "orient":
-                Orient.getPages(ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-        }
+        executeProviderOperation(link, ds, 'getPages');
     });
 };
 
@@ -225,29 +135,7 @@ exports.remove = function(link) {
             return;
         }
 
-        switch (ds.type) {
-            case "mongo":
-                Mongo.remove(ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-            
-            case "orient":
-                Orient.remove(ds, function(err, data) {
-                    if (err) {
-                        link.send(400, err);
-                        return;
-                    }
-
-                    link.send(200, data);
-                });
-                break;
-        }
+        executeProviderOperation(link, ds, 'remove');
     });
 };
 
@@ -284,4 +172,16 @@ function removeSampleItems(data) {
         initSampleItems();
     }
 }
+
+function initSampleItems() {
+    sampleItems = [];
+    for (var i = 0; i < 10; i++) {
+        sampleItems.push({
+            id: ++sampleIndex,
+            text: "Static item " + (i + 1)
+        });
+    }
+}
+
+initSampleItems();
 
