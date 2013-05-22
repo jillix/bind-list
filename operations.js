@@ -55,6 +55,10 @@ exports.read = function(link) {
         
         var itemsToSend = sampleItems;
         
+        var data = link.data || {};
+        var filter = data.filter || {};
+        var options = data.options || {};
+
         if (options.skip >= 0 && options.limit >= 0) {
 
             var begin = options.skip;
@@ -98,6 +102,10 @@ exports.update = function(link) {
 exports.getPages = function(link) {
     
     if (link.params && link.params.ds === "testDS") {
+
+        var data = link.data || {};
+        var size = data.size;
+
         pagesNr = Math.ceil(sampleItems.length / size);
         
         link.send(200, "" + (pagesNr || 0));
