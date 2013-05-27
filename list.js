@@ -416,11 +416,12 @@ function List(module) {
             data.options.sort = config.options.sort;
         }
 
+        data.filter = {};
         // merge the configured filters
         if (config.options.filters && typeof config.options.filters === 'object') {
-            data.filter = config.options.filters;
-        } else {
-            data.filter = {};
+            for (var i in config.options.filters) {
+                data.filter[i] = (config.options.filters || {})[i];
+            }
         }
 
         for (var i in filter) {
@@ -622,3 +623,4 @@ module.exports = function (module, config) {
 
     return list;
 }
+
