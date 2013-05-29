@@ -83,7 +83,7 @@ exports.getPages = function(link, ds, callback) {
                 return;
             }
 
-            collection.count(filter, function(err, length) {
+            collection.count(filter, options, function(err, length) {
 
                 if (err) { return callback(err); }
                 
