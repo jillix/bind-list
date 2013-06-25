@@ -60,15 +60,18 @@ exports.update = function(ds, callback) {
 };
 
 exports.getPages = function(link, ds, callback) {
-    
+
     var pagesNr = 0;
-    
+
     var data = link.data || {};
     var size = data.size;
-    
+
     var filter = data.filter || {};
     var options = data.options || {};
-        
+
+    delete options.limit;
+    delete options.skip;
+
     M.database.open(ds, function(err, db) {
 
         if (err) {
@@ -86,7 +89,7 @@ exports.getPages = function(link, ds, callback) {
             collection.count(filter, options, function(err, length) {
 
                 if (err) { return callback(err); }
-                
+
                 pagesNr = Math.ceil(length / size);
 
                 callback(null, pagesNr);
