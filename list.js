@@ -145,6 +145,10 @@ function List(module) {
                     page = pageNumber;
 
                     showPage(pageNumber, dbData.filter, dbData.options);
+
+                    if (!pagination.hash) {
+                        return false;
+                    }
                 });
             }
         }
