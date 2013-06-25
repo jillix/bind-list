@@ -25,22 +25,22 @@ function List(module) {
         }
 
         config.options.pagination.numbers = config.options.pagination.numbers || {};
-        
+
         if (JSON.stringify(config.options.pagination.numbers) !== "{}") {
             paginationNumbers = true;
         }
-        
+
         config.options.pagination.controls = config.options.pagination.controls || {};
         config.options.pagination.classes = config.options.pagination.classes || {};
 
         config.options.pagination.numbers.options = config.options.pagination.numbers.options || {}
         config.options.pagination.numbers.classes = config.options.pagination.numbers.classes || {};
         config.options.pagination.numbers.keywords = config.options.pagination.numbers.keywords || {};
-        
+
         if (pagination) {
             pagination = config.options.pagination;
         }
-        
+
         var optClasses = config.options.classes || {}
         optClasses.item = optClasses.item || "item";
         optClasses.selected = optClasses.selected || "selected";
@@ -99,35 +99,42 @@ function List(module) {
             pagination.dom.previous = $(pagination.controls.previous);
             pagination.dom.pages = [];
 
-            disabledClass = pagination.controls.disable
-            
+            disabledClass = pagination.controls.disable;
+
             for (var i in pagination.controls) {
+
                 switch (i) {
+
                     case "next":
-                        binds.push({
-                            target: pagination.controls.next,
-                            // TODO Don't click on disabled class!
-                            on: [{
-                                name: "click",
-                                handler: "goToNextPage"
-                            }]
+                        $(pagination.controls[i]).on("click", function () {
+                            var clickedElem = $(this);
+
+                            if (clickedElem.hasClass(disabledClass) || clickedElem.prop(disabledClass)) {
+                                return false;
+                            }
+
+                            goToNextPage();
+                            return false;
                         });
                         break;
-                    
+
                     case "previous":
-                        binds.push({
-                            target: pagination.controls.previous,
-                            on: [{
-                                name: "click",
-                                handler: "goToPrevPage"
-                            }]
+                        $(pagination.controls[i]).on("click", function () {
+                            var clickedElem = $(this);
+
+                            if (clickedElem.hasClass(disabledClass) || clickedElem.prop(disabledClass)) {
+                                return false;
+                            }
+
+                            goToPrevPage();
+                            return false;
                         });
                         break;
                 }
             }
 
             if (paginationNumbers) {
-                
+
                 $(self.dom).on("click", "." + pagination.numbers.classes.item + ":not(.active)", function() {
                     var pageNumber = parseInt($(this).attr("data-page"));
 
@@ -136,7 +143,7 @@ function List(module) {
                     }
 
                     page = pageNumber;
-                    
+
                     showPage(pageNumber, dbData.filter, dbData.options);
                 });
             }
@@ -159,7 +166,7 @@ function List(module) {
             self.read({}, { sort: config.options.sort });
         }
     }
-    
+
     function render(item) {
         switch (config.template.type) {
             case "selector":
@@ -196,7 +203,7 @@ function List(module) {
     // Pagination functions ***********
     // ********************************
     var disabledClass;
-    
+
     function setDisabled(filter, options) {
 
         var data = {
@@ -204,10 +211,10 @@ function List(module) {
             "options": options,
             "size": pagination.size
         };
-        
+
         getPages(data, function(err, pagesNr) {
             if (err) { return; }
-            
+
             // the the pagination only when at least 2 pages
             if (pagesNr > 1) {
                 pagination.dom.container.show();
@@ -222,7 +229,7 @@ function List(module) {
             var controls = pagination.controls;
             var disableClass = pagination.classes.disable;
             var disableAttr = pagination.controls.disable;
-           
+
             if (page <= 1) {
                 $(controls.previous).attr(disableAttr, "");
                 $(controls.previous).addClass(disableClass);
@@ -239,11 +246,12 @@ function List(module) {
             else {
                 $(controls.next).removeAttr(disableAttr);
                 $(controls.next).removeClass(disableClass);
-            }    
+            }
         });
     }
-    
+
     function buildPaginationNumbers(numbers) {
+
         numbers = parseInt(numbers) || 0;
 
         emptyPagination();
@@ -253,20 +261,12 @@ function List(module) {
 
         for (var i = 1; i <= numbers; i++) {
             var item = $(template).clone().removeClass(template.substring(1)).addClass(numbersConfig.classes.item);
-          
+
             var html = item[0].outerHTML;
             html = html.replace(new RegExp(numbersConfig.keywords.pageNumber, "g"), i);
 
             // if current page add the active class name
             html = html.replace(new RegExp(numbersConfig.keywords.active, "g"), (page !== i ? "" : numbersConfig.classes.active));
-
-            // hide next button if on the last page
-            if (page === i) $(pagination.controls.next, self.dom).hide();
-            else $(pagination.controls.next, self.dom).show();
-
-            // hide previous button if on the first page
-            if (page === 1) $(pagination.controls.previous, self.dom).hide();
-            else $(pagination.controls.previous, self.dom).show();
 
             item = $(html);
 
@@ -291,7 +291,7 @@ function List(module) {
                         if (i === 1) {
                             pagination.dom.pages.push(item);
                         }
-                        
+
                         // If is current page
                         if (i === page) {
                             // To prevent "« 1 ... 2"
@@ -314,17 +314,17 @@ function List(module) {
 
                         // TODO Maybe a more inspired variable name?
                         var delta = options.max - 3;
-                        
+
                         if (i === 1) {
                             pagination.dom.pages.push(item);
-                           
+
                             if (page - delta > 2) {
                                 appendDots();
                             }
                         }
 
                         if (i === numbers) {
-                            if (page < numbers - 1) {
+                            if (page < numbers - 1 && numbers > delta) {
                                 appendDots();
                             }
 
@@ -348,10 +348,10 @@ function List(module) {
     }
 
     function appendDots() {
-        
+
         var li = $("<li>");
         li.addClass(pagination.numbers.classes.item);
-        
+
         var span = $("<span>");
         span.text("…");
 
@@ -362,15 +362,15 @@ function List(module) {
 
     function getPages(data, callback) {
         self.link("getPages", { data: data }, function(err, pagesNr) {
-            if (err) { 
+            if (err) {
                 callback(err);
                 return;
             }
-            
+
             callback(null, pagesNr);
         });
     }
-    
+
     // ********************************
     // Public functions ***************
     // ********************************
@@ -382,29 +382,29 @@ function List(module) {
         filter: {},
         options: {}
     };
-    
+
     var oldFilter, newFilter;
 
     function read(fil, ops) {
 
         fil = fil || {};
         ops = ops || {};
-        
+
         oldFilter = JSON.stringify(dbData.filter);
         newFilter = JSON.stringify(fil);
-        
+
         var filter = JSON.parse(JSON.stringify(fil));
         var options = JSON.parse(JSON.stringify(ops));
-        
+
         clearList();
 
         if (pagination) {
             var size = pagination.size;
             var skip = (page - 1) * size;
-            
+
             options.limit = options.size || size;
             options.skip = options.skip || skip;
-            
+
             setDisabled(filter, options);
         }
 
@@ -429,10 +429,10 @@ function List(module) {
         }
 
         if (oldFilter !== newFilter && pagination) {
-            
+
             dbData.filter = data.filter;
             dbData.options = data.options;
-            
+
             page = 1;
 
             oldFilter = newFilter;
@@ -449,7 +449,6 @@ function List(module) {
                 return;
             }
 
-            
             for (var i in data) {
                 render.call(self, data[i]);
             }
@@ -474,7 +473,7 @@ function List(module) {
         self.link(config.crud.create, { data: itemData }, function(err, data) {
             if (err) { return; }
             if (!pagination) {
-                render.call(self, data);    
+                render.call(self, data);
             }
             else {
                 showPage(page, dbData.filter, dbData.options);
@@ -513,7 +512,7 @@ function List(module) {
 
         var filter = {};
         filter.data = {};
-        filter.data[config.options.id] = ids; 
+        filter.data[config.options.id] = ids;
 
         self.link(config.crud['delete'], filter, function(err, data) {
             if (err) { return; }
@@ -569,25 +568,25 @@ function List(module) {
     function goToNextPage() {
         showPage(++page, dbData.filter, dbData.options);
     }
-    
+
     function goToPrevPage() {
         showPage(--page, dbData.filter, dbData.options);
     }
-    
+
     function showPage(number, filter, options) {
-        
+
         var size = pagination.size;
         var skip = (number - 1) * size;
-        
+
         var fil = JSON.parse(JSON.stringify(filter));
         var ops = JSON.parse(JSON.stringify(options));
-        
+
         ops.skip = skip;
         ops.limit = size;
-        
+
         read(fil, ops);
     }
-    
+
     function emptyPagination() {
         $("." + pagination.numbers.classes.item).remove();
         pagination.dom.pages = [];
@@ -613,14 +612,13 @@ function List(module) {
 module.exports = function (module, config) {
 
     var list = new List(module);
-    
+
     for (var i in list) {
         list[i] = module[i] || list[i];
     }
-    
+
     list = Object.extend(list, module);
     list.init(config);
 
     return list;
 }
-
