@@ -328,7 +328,7 @@ function List(module) {
                         }
 
                         if (i === numbers) {
-                            if (page < numbers - 1 && numbers > delta) {
+                            if (page < numbers - 2 && numbers > delta) {
                                 appendDots();
                             }
 
