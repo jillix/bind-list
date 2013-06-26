@@ -135,7 +135,12 @@ function List(module) {
 
             if (paginationNumbers) {
 
-                $(self.dom).on("click", "." + pagination.numbers.classes.item + ":not(.active)", function() {
+                $(self.dom).on("click", "." + pagination.numbers.classes.item, function() {
+
+                    if ($(this).hasClass("active")) {
+                        return false;
+                    }
+
                     var pageNumber = parseInt($(this).attr("data-page"));
 
                     if (!pageNumber) {
