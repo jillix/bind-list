@@ -172,7 +172,7 @@ function List(module) {
 
 
         if (config.options.autofetch) {
-            self.read({}, { sort: config.options.sort });
+            self.read(config.options.filters || {}, { sort: config.options.sort });
         }
     }
 
