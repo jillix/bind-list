@@ -15,9 +15,6 @@ function List(module) {
     function processConfig(config) {
         config.template.binds = config.template.binds || [];
 
-        // TODO
-        config.waiter = ".waiter";
-
         config.options = config.options || {};
         config.options.sort = config.options.sort || {};
         config.options.id = config.options.id || "id";

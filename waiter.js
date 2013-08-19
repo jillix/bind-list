@@ -8,10 +8,10 @@ module.exports = {
     },
     start: function () {
         if (!waiter) { return; }
-        waiter.fadeIn();
+        waiter.stop(true, false).slideDown();
     },
     stop: function () {
         if (!waiter) { return; }
-        waiter.fadeOut();
+        waiter.stop(true, false).slideUp();
     }
 };
