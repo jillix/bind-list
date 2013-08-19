@@ -3,7 +3,10 @@ Bind List
 
 List module for bind.
 
-# Change Logs
+# Changelog
+
+### v0.1.4
+ - Implemented waiter support
 
 ### v0.1.3
 
@@ -17,3 +20,6 @@ List module for bind.
 
  - Added options when counting the pages number.
 
+### v0.1.0
+
+ - Initial release
