@@ -1,5 +1,6 @@
 var Bind = require("github/jillix/bind");
 var Events = require("github/jillix/events");
+var Waiter = require("./waiter");
 
 function List(module) {
 
@@ -13,6 +14,9 @@ function List(module) {
 
     function processConfig(config) {
         config.template.binds = config.template.binds || [];
+
+        // TODO
+        config.waiter = ".waiter";
 
         config.options = config.options || {};
         config.options.sort = config.options.sort || {};
@@ -45,6 +49,10 @@ function List(module) {
         optClasses.item = optClasses.item || "item";
         optClasses.selected = optClasses.selected || "selected";
         config.options.classes = optClasses;
+
+        if (config.waiter) {
+            Waiter.init(self, config.waiter);
+        }
 
         return config;
     }
@@ -450,7 +458,10 @@ function List(module) {
             return;
         }
 
+        Waiter.start();
         self.link(config.crud.read, { data: data }, function(err, data) {
+
+            Waiter.stop();
 
             if (err) { return; }
 
