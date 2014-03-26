@@ -5,6 +5,9 @@ List module for bind.
 
 # Changelog
 
+### v0.1.6
+ - Updated Bind and Events
+
 ### v0.1.5
  - Updated Bind and Events
 
